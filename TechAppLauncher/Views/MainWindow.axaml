@@ -1,0 +1,61 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:TechAppLauncher.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="500"
+		Width="1000" Height="500"
+        x:Class="TechAppLauncher.Views.MainWindow"
+        Icon="/Assets/avalonia-logo.ico"
+		WindowStartupLocation="CenterScreen"
+        Title="TechAppLauncher"
+		
+		TransparencyLevelHint="AcrylicBlur"
+        Background="Transparent"
+		
+		ExtendClientAreaToDecorationsHint="True">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+	<Panel >
+		<ExperimentalAcrylicBorder IsHitTestVisible="False">
+			<ExperimentalAcrylicBorder.Material>
+				<ExperimentalAcrylicMaterial
+					BackgroundSource="Digger"
+					TintColor="Black"
+					TintOpacity="1"
+					MaterialOpacity="0.65" />
+			</ExperimentalAcrylicBorder.Material>
+		</ExperimentalAcrylicBorder>
+
+		<StackPanel Background="#00a19c">
+			<TextBlock TextAlignment="Center" Margin="0,8,0,0" FontSize="18">Petronas</TextBlock>
+			<TextBlock TextAlignment="Center" FontSize="12">Tech App Store</TextBlock>
+		</StackPanel>
+		<Panel Margin="40">
+			<Button Content="Select App." Command="{Binding SelectAppCommand}" HorizontalAlignment="Right" VerticalAlignment="Top">
+				<PathIcon Data="{StaticResource app_store_regular}" />
+			</Button>
+
+			<TextBlock IsVisible="{Binding CollectionEmpty}" Text="Let's get started by selecting an app..." HorizontalAlignment="Center" VerticalAlignment="Center" />
+			
+			<Button Content="Lunch" IsEnabled="{Binding !CollectionEmpty}" Margin="0,0,60,0" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+			</Button>	
+			
+			<Button Content="Close" Command="{Binding CloseWin}" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+			</Button>
+
+			<ItemsControl Margin="0 40 0 40" Items="{Binding Apps}" IsVisible="{Binding !CollectionEmpty}" Background="#333333">
+				<ItemsControl.ItemsPanel>
+					<ItemsPanelTemplate>
+						<WrapPanel />
+					</ItemsPanelTemplate>
+				</ItemsControl.ItemsPanel>
+			</ItemsControl>
+		</Panel>
+	</Panel>
+	
+	
+</Window>
