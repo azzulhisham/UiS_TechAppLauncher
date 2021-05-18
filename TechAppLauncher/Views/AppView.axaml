@@ -16,8 +16,8 @@
 					</Panel>
 				</Panel>
 			</Border>
-			<TextBlock Text="{Binding AppGroup}" HorizontalAlignment="Center" Foreground="#00a19c" Margin="0,0,0,8" FontSize="20" />
-			<TextBlock Text="{Binding Description}" HorizontalAlignment="Center" Foreground="#00a19c" Margin="0,0,0,8" Height="80" TextWrapping="Wrap"/>
+			<TextBlock Text="{Binding AppGroup}" HorizontalAlignment="Center" Foreground="#00a19c" Margin="0 0 0 8" FontSize="20" />
+			<TextBlock Text="{Binding Description}" HorizontalAlignment="Center" Foreground="#00a19c" Margin="8 8 8 8" Height="80" TextWrapping="Wrap"/>
 		</StackPanel>		
 	</Border>
 

@@ -17,7 +17,9 @@ namespace TechAppLauncher.Views
             this.AttachDevTools();
 #endif
 
-            this.WhenActivated(d => d(ViewModel.GetAppMusicCommand.Subscribe(Close)));
+            this.WhenActivated(d => d(ViewModel.GetAppSelectCommand.Subscribe(Close)));
+
+            this.WhenActivated(d => d(ViewModel.GetAppSelectCommandClose.Subscribe(Close)));
         }
 
         private void InitializeComponent()

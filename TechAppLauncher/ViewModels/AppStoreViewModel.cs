@@ -15,25 +15,42 @@ namespace TechAppLauncher.ViewModels
     {
         private AppViewModel? _selectedApp;
         private CancellationTokenSource? _cancellationTokenSource;
+        private bool _isLaunchAble;
 
         public ObservableCollection<AppViewModel> SelectedResults { get; } = new();
-        public ReactiveCommand<Unit, AppViewModel?> GetAppMusicCommand { get; }
+        public ReactiveCommand<Unit, AppViewModel?> GetAppSelectCommand { get; }
+        public ReactiveCommand<Unit, AppViewModel?> GetAppSelectCommandClose { get; }
 
 
         public AppViewModel? SelectedApp
         {
             get => _selectedApp;
-            set => this.RaiseAndSetIfChanged(ref _selectedApp, value);
+            set 
+            {
+                this.IsLaunchAble = true;
+                this.RaiseAndSetIfChanged(ref _selectedApp, value);
+            }
+        }
+
+        public bool IsLaunchAble
+        {
+            get => _isLaunchAble;
+            set => this.RaiseAndSetIfChanged(ref _isLaunchAble, value);
         }
 
         public AppStoreViewModel()
         {
-            GetAppMusicCommand = ReactiveCommand.Create(() =>
+            GetAppSelectCommand = ReactiveCommand.Create(() =>
             {
                 return SelectedApp;
             });
 
-           
+            GetAppSelectCommandClose = ReactiveCommand.Create(() =>
+            {
+                SelectedApp = null;
+                return SelectedApp;
+            });
+
             ListAllApp();
         }
 
@@ -45,7 +62,8 @@ namespace TechAppLauncher.ViewModels
             try
             {
                 //Call API
-                var apps = await TechAppStoreService.GetAllAsync();
+                TechAppStoreService techAppStoreService = new TechAppStoreService();
+                var apps = await techAppStoreService.GetAllAsync();
 
                 foreach (var app in apps)
                 {

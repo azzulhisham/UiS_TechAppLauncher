@@ -3,51 +3,83 @@
         xmlns:vm="using:TechAppLauncher.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="500"
-		Width="1000" Height="500"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="500"
+		Width="800" Height="500"
         x:Class="TechAppLauncher.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
-		WindowStartupLocation="CenterScreen"
         Title="TechAppLauncher"
 		
+		WindowStartupLocation="CenterScreen"
 		TransparencyLevelHint="AcrylicBlur"
         Background="Transparent"
 		
-		ExtendClientAreaToDecorationsHint="True">
+		ExtendClientAreaToDecorationsHint="true">
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-	<Panel >
+	<Grid>
 		<ExperimentalAcrylicBorder IsHitTestVisible="False">
 			<ExperimentalAcrylicBorder.Material>
 				<ExperimentalAcrylicMaterial
 					BackgroundSource="Digger"
 					TintColor="Black"
-					TintOpacity="1"
+					TintOpacity="0.1"
 					MaterialOpacity="0.65" />
 			</ExperimentalAcrylicBorder.Material>
 		</ExperimentalAcrylicBorder>
 
-		<StackPanel Background="#00a19c">
-			<TextBlock TextAlignment="Center" Margin="0,8,0,0" FontSize="18">Petronas</TextBlock>
-			<TextBlock TextAlignment="Center" FontSize="12">Tech App Store</TextBlock>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="10" />
+			<ColumnDefinition Width="auto" />
+			<ColumnDefinition Width="auto" />
+			<ColumnDefinition Width="100" />
+			<ColumnDefinition Width="10" />
+			<ColumnDefinition Width="*" />
+			<ColumnDefinition Width="50" />
+			<ColumnDefinition Width="10" />
+		</Grid.ColumnDefinitions>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="30" />
+			<RowDefinition Height="auto" />
+			<RowDefinition Height="auto" />
+			<RowDefinition Height="auto" />
+			<RowDefinition Height="auto" />
+			<RowDefinition Height="auto" />
+			<RowDefinition Height="auto" />
+			<RowDefinition Height="*" />
+			<RowDefinition Height="50" />
+			<RowDefinition Height="10" />
+		</Grid.RowDefinitions>
+
+		<StackPanel Background="#00a19c" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="5">
+			<TextBlock TextAlignment="Center" FontSize="18" Padding="0 8 0 0">Petronas</TextBlock>
+			<TextBlock TextAlignment="Center" FontSize="12" Padding="0 0 0 8">Tech App Store</TextBlock>
 		</StackPanel>
-		<Panel Margin="40">
-			<Button Content="Select App." Command="{Binding SelectAppCommand}" HorizontalAlignment="Right" VerticalAlignment="Top">
+
+		<Panel Background="#00a19c" Grid.Column="6" Grid.Row="1">
+			<Button Content="Select App." Command="{Binding SelectAppCommand}" HorizontalAlignment="Right" Margin="8 8">
 				<PathIcon Data="{StaticResource app_store_regular}" />
-			</Button>
+			</Button>			
+		</Panel>
 
-			<TextBlock IsVisible="{Binding CollectionEmpty}" Text="Let's get started by selecting an app..." HorizontalAlignment="Center" VerticalAlignment="Center" />
-			
-			<Button Content="Lunch" IsEnabled="{Binding !CollectionEmpty}" Margin="0,0,60,0" HorizontalAlignment="Right" VerticalAlignment="Bottom">
-			</Button>	
-			
-			<Button Content="Close" Command="{Binding CloseWin}" HorizontalAlignment="Right" VerticalAlignment="Bottom">
-			</Button>
+		<Panel Background="#00a19c" Grid.Column="1" Grid.Row="8"  Grid.ColumnSpan="6" >
+			<StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+				<Button Content="Launch" Command="{Binding LaunchApp}" IsEnabled="{Binding IsLaunchAble}" Margin="4 0">
+				</Button>
 
-			<ItemsControl Margin="0 40 0 40" Items="{Binding Apps}" IsVisible="{Binding !CollectionEmpty}" Background="#333333">
+				<Button Content="Close" Command="{Binding CloseWin}" Margin="4 0 8 0">
+				</Button>				
+			</StackPanel>	
+		</Panel>
+
+		<Panel Background="#00a19c" Grid.Column="1" Grid.Row="2"  Grid.ColumnSpan="6" Grid.RowSpan="6" IsVisible="{Binding CollectionEmpty}">
+			<TextBlock Text="Let's get started by selecting an app..." HorizontalAlignment="Center" VerticalAlignment="Center" />
+		</Panel>
+
+		<Panel Background="#00a19c" Grid.Column="1" Grid.Row="2"  Grid.ColumnSpan="2" Grid.RowSpan="6" IsVisible="{Binding !CollectionEmpty}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+			<ItemsControl Items="{Binding Apps}" IsVisible="{Binding !CollectionEmpty}" Background="#00a19c">
 				<ItemsControl.ItemsPanel>
 					<ItemsPanelTemplate>
 						<WrapPanel />
@@ -55,7 +87,82 @@
 				</ItemsControl.ItemsPanel>
 			</ItemsControl>
 		</Panel>
-	</Panel>
-	
-	
+
+		
+		<!--App UID-->
+		<Panel Background="#00a19c" Grid.Column="3" Grid.Row="2" HorizontalAlignment="Stretch" IsVisible="{Binding !CollectionEmpty}">
+			<TextBlock Text="App UID" Padding="4" Margin="4 0 0 0"></TextBlock>
+		</Panel>
+
+		<Panel Background="#00a19c" Grid.Column="4" Grid.Row="2" IsVisible="{Binding !CollectionEmpty}">
+			<TextBlock Text=":" Padding="4"></TextBlock>
+		</Panel>
+		
+		<Panel Background="#00a19c" Grid.Column="5" Grid.Row="2" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" IsVisible="{Binding !CollectionEmpty}">
+			<TextBlock Text="{Binding SelectedAppUID}" Padding="4" TextWrapping="Wrap"></TextBlock>
+		</Panel>
+
+		<!--Title-->
+		<Panel Background="#00a19c" Grid.Column="3" Grid.Row="3" HorizontalAlignment="Stretch" IsVisible="{Binding !CollectionEmpty}">
+			<TextBlock Text="Title" Padding="4" Margin="4 0 0 0"></TextBlock>
+		</Panel>
+
+		<Panel Background="#00a19c" Grid.Column="4" Grid.Row="3" IsVisible="{Binding !CollectionEmpty}">
+			<TextBlock Text=":" Padding="4"></TextBlock>
+		</Panel>
+
+		<Panel Background="#00a19c" Grid.Column="5" Grid.Row="3" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" IsVisible="{Binding !CollectionEmpty}">
+			<TextBlock Text="{Binding SelectedAppTitle}" Padding="4" TextWrapping="Wrap"></TextBlock>
+		</Panel>
+
+		<!--Version-->
+		<Panel Background="#00a19c" Grid.Column="3" Grid.Row="4" HorizontalAlignment="Stretch" IsVisible="{Binding !CollectionEmpty}">
+			<TextBlock Text="Version" Padding="4" Margin="4 0 0 0"></TextBlock>
+		</Panel>
+
+		<Panel Background="#00a19c" Grid.Column="4" Grid.Row="4" IsVisible="{Binding !CollectionEmpty}">
+			<TextBlock Text=":" Padding="4"></TextBlock>
+		</Panel>
+
+		<Panel Background="#00a19c" Grid.Column="5" Grid.Row="4" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" IsVisible="{Binding !CollectionEmpty}">
+			<TextBlock Text="{Binding SelectedAppVersion}" Padding="4" TextWrapping="Wrap"></TextBlock>
+		</Panel>
+
+		<!--Description-->
+		<Panel Background="#00a19c" Grid.Column="3" Grid.Row="5" HorizontalAlignment="Stretch" IsVisible="{Binding !CollectionEmpty}">
+			<TextBlock Text="Description" Padding="4" Margin="4 0 0 0"></TextBlock>
+		</Panel>
+
+		<Panel Background="#00a19c" Grid.Column="4" Grid.Row="5" IsVisible="{Binding !CollectionEmpty}">
+			<TextBlock Text=":" Padding="4"></TextBlock>
+		</Panel>
+
+		<Panel Background="#00a19c" Grid.Column="5" Grid.Row="5" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" IsVisible="{Binding !CollectionEmpty}">
+			<TextBlock Text="{Binding SelectedAppDescription}" Padding="4" TextWrapping="Wrap"></TextBlock>
+		</Panel>
+
+		<!--Ref. File-->
+		<Panel Background="#00a19c" Grid.Column="3" Grid.Row="6" HorizontalAlignment="Stretch" IsVisible="{Binding !CollectionEmpty}">
+			<TextBlock Text="Ref. File" Padding="4" Margin="4 0 0 0"></TextBlock>
+		</Panel>
+
+		<Panel Background="#00a19c" Grid.Column="4" Grid.Row="6" IsVisible="{Binding !CollectionEmpty}">
+			<TextBlock Text=":" Padding="4"></TextBlock>
+		</Panel>
+
+		<Panel Background="#00a19c" Grid.Column="5" Grid.Row="6" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" IsVisible="{Binding !CollectionEmpty}">
+			<TextBlock Text="{Binding SelectedAppRefFile}" Padding="4" TextWrapping="Wrap"></TextBlock>
+		</Panel>
+
+		<!---->
+		<Panel Background="#00a19c" Grid.Column="3" Grid.Row="7"  Grid.ColumnSpan="4" IsVisible="{Binding !CollectionEmpty}">
+			<ListBox Items="{Binding Galleries}" Background="#333333" >
+				<ListBox.ItemsPanel>
+					<ItemsPanelTemplate>
+						<WrapPanel />
+					</ItemsPanelTemplate>
+				</ListBox.ItemsPanel>
+			</ListBox>
+		</Panel>
+	</Grid>
 </Window>

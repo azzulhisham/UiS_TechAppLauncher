@@ -25,6 +25,11 @@ namespace TechAppLauncher.ViewModels
 
         public string AppGroup => _app.AppGroup;
 
+        public int AppId => _app.ID;
+
+        public string AppUID => _app.AppUID;
+
+        public double? AppVersion => _app.AppVersion;
 
         private Bitmap? _appImg;
 
@@ -40,7 +45,7 @@ namespace TechAppLauncher.ViewModels
             {
                 if (_app.AppLogoUrl != null)
                 {
-                    await using (var imageStream = await TechAppStoreService.LoadCoverBitmapAsync(_app.AppLogoUrl.Url))
+                    await using (var imageStream = await new TechAppStoreService().LoadCoverBitmapAsync(_app.AppLogoUrl.Url))
                     {
                         if (imageStream != null)
                         {
@@ -53,7 +58,6 @@ namespace TechAppLauncher.ViewModels
             {
 
             }
-
         }
     }
 }

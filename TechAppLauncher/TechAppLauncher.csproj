@@ -15,6 +15,11 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Update="Views\AppGalleryView.axaml.cs">
+      <DependentUpon>AppGalleryView.axaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
     <None Update="Data\TestData.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

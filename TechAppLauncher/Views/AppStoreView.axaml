@@ -6,8 +6,11 @@
              x:Class="TechAppLauncher.Views.AppStoreView">
 
 	<DockPanel>
-
-		<Button Command="{Binding GetAppMusicCommand}"  Content="Launch App." DockPanel.Dock="Bottom" HorizontalAlignment="Center" />
+		<StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Center">
+			<Button Command="{Binding GetAppSelectCommand}" IsEnabled="{Binding IsLaunchAble}" Content="Launch App." />
+			<Button Command="{Binding GetAppSelectCommandClose}"  Content="Close" />
+		</StackPanel>
+		
 		<ListBox Items="{Binding SelectedResults}" SelectedItem="{Binding SelectedApp}" Background="#333333" Margin="0 20">
 			<ListBox.ItemsPanel>
 				<ItemsPanelTemplate>
