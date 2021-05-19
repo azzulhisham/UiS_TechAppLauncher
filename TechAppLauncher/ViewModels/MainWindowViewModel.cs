@@ -280,7 +280,7 @@ namespace TechAppLauncher.ViewModels
                         if (result.ExitCode == 0)
                         {
                             //success
-                            SelectedAppRefFile = " : " + this._refFileInfo.FileName + $" - installed {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}";
+                            SelectedAppRefFile = this._refFileInfo.FileName + $" - installed {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}";
                         }
                         else
                         {
@@ -290,10 +290,10 @@ namespace TechAppLauncher.ViewModels
 
 
                     //remove working folder after all task done
-                    if (Directory.Exists(workingFolder))
-                    {
-                        Directory.Delete(workingFolder, true);
-                    }
+                    //if (Directory.Exists(workingFolder))
+                    //{
+                    //    Directory.Delete(workingFolder, true);
+                    //}
                 }
             }
         }
