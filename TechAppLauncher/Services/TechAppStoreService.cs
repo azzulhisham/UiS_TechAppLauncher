@@ -17,7 +17,7 @@ using TechAppLauncher.Models;
 
 namespace TechAppLauncher.Services
 {
-    public class TechAppStoreService
+    public class TechAppStoreService : ITechAppStoreNetworkRequestService
     {
         private HttpClient s_httpClient;
         private HttpClientHandler _handler;
@@ -27,7 +27,7 @@ namespace TechAppLauncher.Services
         {
             _handler = new HttpClientHandler()
             {
-                Credentials = new NetworkCredential("zulhisham.tanabdulla", "AZ@ZThoe03081972", "petronas")
+                Credentials = new NetworkCredential("techus.admin", "NS@ADout02122021", "petronas")
             };
 
             _handler.ClientCertificateOptions = ClientCertificateOption.Manual;
@@ -50,7 +50,7 @@ namespace TechAppLauncher.Services
             request.Headers.Accept.Clear();
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             //request.Content = new StringContent("", Encoding.UTF8, "application/json");
-            
+
 
             s_httpClient = new HttpClient(_handler);
             s_httpClient.DefaultRequestHeaders.Accept.Clear();
@@ -76,7 +76,7 @@ namespace TechAppLauncher.Services
                 ShortDescription = s.content.properties.ShortDescription != null ? s.content.properties.ShortDescription.Value : "",
                 AppLogoUrl = new Models.AppLogoUrl()
                 {
-                    Url = s.content.properties.AppLogoUrl !=null && s.content.properties.AppLogoUrl.Url != null ? s.content.properties.AppLogoUrl.Url : null,
+                    Url = s.content.properties.AppLogoUrl != null && s.content.properties.AppLogoUrl.Url != null ? s.content.properties.AppLogoUrl.Url : null,
                 }
             }).ToList();
 

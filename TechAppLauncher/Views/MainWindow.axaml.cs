@@ -4,6 +4,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
 using ReactiveUI;
 using System;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using TechAppLauncher.ViewModels;
@@ -21,6 +22,7 @@ namespace TechAppLauncher.Views
 
             this.WhenActivated(d => d(ViewModel.CloseWin.Subscribe(Close)));
             this.WhenActivated(d => d(ViewModel.ShowAppDialog.RegisterHandler(DoShowAppDialogAsync)));
+            this.WhenActivated(d => d(ViewModel.ShowMsgDialog.RegisterHandler(DoShowMsgDialogAsync)));
         }
 
         private void InitializeComponent()
@@ -34,6 +36,15 @@ namespace TechAppLauncher.Views
             appStoreDialog.DataContext = interaction.Input;
 
             var result = await appStoreDialog.ShowDialog<AppViewModel?>(this);
+            interaction.SetOutput(result);
+        }
+
+        private async Task DoShowMsgDialogAsync(InteractionContext<MessageDialogViewModel, MessageDialogViewModel> interaction)
+        {
+            var msgDialog = new MessageDialogView();
+            msgDialog.DataContext = interaction.Input;
+
+            var result = await msgDialog.ShowDialog<MessageDialogViewModel>(this);
             interaction.SetOutput(result);
         }
     }

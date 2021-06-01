@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,7 +16,13 @@ namespace TechAppLauncher.ViewModels
     {
         private AppViewModel? _selectedApp;
         private CancellationTokenSource? _cancellationTokenSource;
+        
         private bool _isLaunchAble;
+        private bool _isBusy;
+        private bool _isSearchAble;
+
+        private string? _searchText;
+        private IList<Models.App> _apps;
 
         public ObservableCollection<AppViewModel> SelectedResults { get; } = new();
         public ReactiveCommand<Unit, AppViewModel?> GetAppSelectCommand { get; }
@@ -38,8 +45,31 @@ namespace TechAppLauncher.ViewModels
             set => this.RaiseAndSetIfChanged(ref _isLaunchAble, value);
         }
 
+        public bool IsSearchAble
+        {
+            get => _isSearchAble;
+            set => this.RaiseAndSetIfChanged(ref _isSearchAble, value);
+        }
+
+        public string? SearchText
+        {
+            get => _searchText;
+            set => this.RaiseAndSetIfChanged(ref _searchText, value);
+        }
+
+        public bool IsBusy
+        {
+            get => _isBusy;
+            set => this.RaiseAndSetIfChanged(ref _isBusy, value);
+        }
+
         public AppStoreViewModel()
         {
+            this.WhenAnyValue(x => x.SearchText)
+                .Throttle(TimeSpan.FromMilliseconds(400))
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(DoSearch!);
+
             GetAppSelectCommand = ReactiveCommand.Create(() =>
             {
                 return SelectedApp;
@@ -54,6 +84,31 @@ namespace TechAppLauncher.ViewModels
             ListAllApp();
         }
 
+        private async void DoSearch(string s)
+        {
+            if (_apps == null)
+            {
+                return;
+            }
+
+            IsBusy = true;
+            SelectedResults.Clear();
+
+            _cancellationTokenSource?.Cancel();
+            _cancellationTokenSource = new CancellationTokenSource();
+
+            var apps = _apps.OrderBy(n => n.Title).ToList();
+
+            if (!string.IsNullOrEmpty(s))
+            {
+                apps = _apps.Where(n => n.Title.ToLower().Contains(s.ToLower())).ToList();
+            }
+
+            await LoadAppListView(apps);
+
+            IsBusy = false;
+        }
+
         private async void ListAllApp()
         {
             _cancellationTokenSource?.Cancel();
@@ -62,31 +117,40 @@ namespace TechAppLauncher.ViewModels
             try
             {
                 //Call API
-                TechAppStoreService techAppStoreService = new TechAppStoreService();
-                var apps = await techAppStoreService.GetAllAsync();
-
-                foreach (var app in apps)
-                {
-                    var vm = new AppViewModel(app);
-
-                    SelectedResults.Add(vm);
-                }
-
-                if (!_cancellationTokenSource.IsCancellationRequested)
-                {
-                    try
-                    {
-                        await LoadImage(_cancellationTokenSource.Token);
-                    }
-                    catch (Exception ex)
-                    {
-                        string er = ex.Message;
-                    }
-                }
+                ITechAppStoreNetworkRequestService techAppStoreService = new TechAppStoreService();
+                _apps = await techAppStoreService.GetAllAsync();
+                await LoadAppListView(_apps);
             }
             catch (Exception ex)
             {
 
+            }
+        }
+
+        private async Task LoadAppListView(IList<Models.App> apps)
+        {
+            foreach (var app in apps)
+            {
+                var vm = new AppViewModel(app);
+
+                SelectedResults.Add(vm);
+            }
+
+            if (apps != null && apps.Count > 0)
+            {
+                IsSearchAble = true;
+            }
+
+            if (!_cancellationTokenSource.IsCancellationRequested)
+            {
+                try
+                {
+                    await LoadImage(_cancellationTokenSource.Token);
+                }
+                catch (Exception ex)
+                {
+                    string er = ex.Message;
+                }
             }
         }
 

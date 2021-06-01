@@ -39,7 +39,9 @@ namespace TechAppLauncher.ViewModels
             {
                 if (!string.IsNullOrEmpty(AppImgUrl))
                 {
-                    await using (var imageStream = await new TechAppStoreService().LoadCoverBitmapAsync(AppImgUrl))
+                    ITechAppStoreNetworkRequestService techAppStoreService = new TechAppStoreService();
+
+                    await using (var imageStream = await techAppStoreService.LoadCoverBitmapAsync(AppImgUrl))
                     {
                         if (imageStream != null)
                         {

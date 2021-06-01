@@ -21,6 +21,7 @@ namespace TechAppLauncher.ViewModels
     {
         public ICommand SelectAppCommand { get; }
         public Interaction<AppStoreViewModel, AppViewModel?> ShowAppDialog { get; }
+        public Interaction<MessageDialogViewModel, MessageDialogViewModel> ShowMsgDialog { get; }
         public ObservableCollection<AppViewModel> Apps { get; } = new();
         public ObservableCollection<AppGalleryViewModel> Galleries { get; } = new();
 
@@ -28,11 +29,13 @@ namespace TechAppLauncher.ViewModels
         public ReactiveCommand<Unit, MainWindowViewModel> CloseWin { get; }
 
         private CancellationTokenSource? _cancellationTokenSource;
+        private CancellationToken _cancellationToken;
 
         private RefFileInfo? _refFileInfo;
 
         private bool _collectionEmpty;
         private bool _isLaunchAble;
+        private bool _isBusy;
 
         private string _selectedAppId;
         private string _selectedAppUID;
@@ -94,8 +97,9 @@ namespace TechAppLauncher.ViewModels
 
         public MainWindowViewModel()
         {
-            TechAppStoreService techAppStoreService = new TechAppStoreService();
+            ITechAppStoreNetworkRequestService techAppStoreService = new TechAppStoreService();
             ShowAppDialog = new Interaction<AppStoreViewModel, AppViewModel?>();
+            ShowMsgDialog = new Interaction<MessageDialogViewModel, MessageDialogViewModel>();
 
 
             SelectAppCommand = ReactiveCommand.CreateFromTask(async () =>
@@ -108,6 +112,7 @@ namespace TechAppLauncher.ViewModels
                     refFileDetails = await techAppStoreService.GetAllRefFilesAsync();
                 }
 
+                this.IsLaunchAble = false;
                 Apps.Clear();
 
                 if (result != null && refFileDetails != null)
@@ -125,7 +130,7 @@ namespace TechAppLauncher.ViewModels
                         {
                             refFileUrl = _refFileInfo.FileName;
 
-                            if (_refFileInfo.IsAvailable)
+                            if (!string.IsNullOrEmpty(refFileUrl) && _refFileInfo.IsAvailable)
                             {
                                 this.IsLaunchAble = true;
                             }
@@ -187,6 +192,12 @@ namespace TechAppLauncher.ViewModels
 
         }
 
+        public bool IsBusy
+        {
+            get => _isBusy;
+            set => this.RaiseAndSetIfChanged(ref _isBusy, value);
+        }
+
         private async Task LoadImage(CancellationToken cancellationToken)
         {
             foreach (var appGallery in Galleries.ToList())
@@ -203,7 +214,9 @@ namespace TechAppLauncher.ViewModels
         private async Task LaunchApplication()
         {
             this.IsLaunchAble = false;
+            this.IsBusy = true;
 
+            string messageBoxText = "";
             string targetPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "TechAppLauncher");
 
             if (!Directory.Exists(targetPath))
@@ -230,7 +243,7 @@ namespace TechAppLauncher.ViewModels
             string workingZipFilePath = Path.Combine(workingFolder, this._refFileInfo.FileName);
             string workingPipFilePath = workingZipFilePath.Replace(".zip", ".pip");
 
-            TechAppStoreService techAppStoreService = new TechAppStoreService();
+            ITechAppStoreNetworkRequestService techAppStoreService = new TechAppStoreService();
 
             if (!File.Exists(workingZipFilePath))
             {
@@ -267,34 +280,74 @@ namespace TechAppLauncher.ViewModels
                     string? ocean2019Home_x64 = Environment.GetEnvironmentVariable("OCEAN2019HOME_x64");
                     //string? userProfile = Environment.GetEnvironmentVariable("USERPROFILE");
 
-                    string pluginPackager = Path.Combine(ocean2019Home, "PluginPackager.exe");
-                    string petrelFolder = Path.Combine(ocean2019Home_x64, "petrel.exe");
-                    string pluginXmlFile = Path.Combine(workingFolder, "Plugin.xml");
 
                     if (!string.IsNullOrEmpty(ocean2019Home) && !string.IsNullOrEmpty(ocean2019Home_x64))
                     {
-                        string processCmd = $"\"{pluginPackager}\" /m \"{pluginXmlFile}\" \"{petrelFolder}\" \"{workingFolder}\"";
-                        var result = System.Diagnostics.Process.Start(processCmd);
-                        Thread.Sleep(5000);
-
-                        if (result.ExitCode == 0)
+                        try
                         {
-                            //success
-                            SelectedAppRefFile = this._refFileInfo.FileName + $" - installed {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}";
+                            string pluginPackager = Path.Combine(ocean2019Home, "PluginPackager.exe");
+                            string petrelFolder = Path.Combine(ocean2019Home_x64, "petrel.exe");
+                            string pluginXmlFile = Path.Combine(workingFolder, "Plugin.xml");
+
+                            string processCmd = $"\"{pluginPackager}\" /m \"{pluginXmlFile}\" \"{petrelFolder}\" \"{workingFolder}\"";
+
+                            _cancellationToken = new CancellationToken();
+
+                            var process = System.Diagnostics.Process.Start(processCmd);
+                            //process.StartInfo.CreateNoWindow = true;
+
+                            await process.WaitForExitAsync(_cancellationToken);
+
+                            await Task.Run(() => Sleep(5));
+
+                            if (process.ExitCode == 0)
+                            {
+                                //success
+                                SelectedAppRefFile = this._refFileInfo.FileName + $" - installed {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}";
+                                messageBoxText = "Success! \r\n" + SelectedAppRefFile;
+                            }
+                            else
+                            {
+                                messageBoxText = "Fail! \r\n" + $"ExitCode = {process.ExitCode}";
+                            }
+
                         }
-                        else
+                        catch (Exception ex)
                         {
-
+                            messageBoxText = "Fail! \r\n" + ex.Message;
                         }
                     }
-
+                    else
+                    {
+                        messageBoxText = "Ops! Petrel is not available on your system.";
+                        await Task.Run(() => Sleep(3));
+                    }
 
                     //remove working folder after all task done
                     //if (Directory.Exists(workingFolder))
                     //{
                     //    Directory.Delete(workingFolder, true);
                     //}
+
+                    this.IsBusy = false;
+                    var messageBoxDialog = new MessageDialogViewModel(messageBoxText, (messageBoxText.ToLower().StartsWith("success") ? Enums.MessageBoxIconStyle.IconStyle.Success : Enums.MessageBoxIconStyle.IconStyle.Error));
+                    await ShowMsgDialog.Handle(messageBoxDialog);
                 }
+            }
+            else
+            {
+                var messageBoxDialog = new MessageDialogViewModel("Ops! Looks like there is some techincal issues exists on your system.\r\nKindly refer to the Tech. App. Developer.", Enums.MessageBoxIconStyle.IconStyle.Error);
+                await ShowMsgDialog.Handle(messageBoxDialog);
+            }
+        }
+
+        private async Task Sleep(int seconds)
+        {
+            DateTime now = DateTime.Now;
+
+            while (DateTime.Now < now.AddSeconds(seconds))
+            {
+                Thread.Sleep(1);
             }
         }
     }
