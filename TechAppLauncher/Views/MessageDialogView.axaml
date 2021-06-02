@@ -3,7 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="250"
-        Width="400" Height="120"
+        Width="400" Height="130"
 		x:Class="TechAppLauncher.Views.MessageDialogView"
 		WindowStartupLocation="CenterOwner"
 	    CanResize="False"
@@ -35,7 +35,7 @@
 		</Panel>
 
 		<Panel Grid.Column="2" Grid.Row="1">
-			<TextBlock Text="{Binding MessageText}" Foreground="Black" VerticalAlignment="Center" Margin="8 0" TextWrapping="Wrap"></TextBlock>
+			<TextBlock Text="{Binding MessageText}" Foreground="White" VerticalAlignment="Center" Margin="8 0" TextWrapping="Wrap"></TextBlock>
 		</Panel>
 		
 		<Panel Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2">

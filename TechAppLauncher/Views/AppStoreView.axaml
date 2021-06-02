@@ -12,7 +12,7 @@
 		</StackPanel>
 		
 		<StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Center">
-			<Button Command="{Binding GetAppSelectCommand}" IsEnabled="{Binding IsLaunchAble}" Content="Launch App."  Foreground="White" BorderThickness="1" />
+			<Button Command="{Binding GetAppSelectCommand}" IsEnabled="{Binding IsLaunchAble}" Content="Install Selected App."  Foreground="White" BorderThickness="1" />
 			<Button Command="{Binding GetAppSelectCommandClose}"  Content="Close" Foreground="White" BorderThickness="1" />
 		</StackPanel>
 		

@@ -69,7 +69,7 @@
 				<Button Content="Select App." Command="{Binding SelectAppCommand}" IsVisible="{Binding !CollectionEmpty}" Margin="4 0" Foreground="White" BorderThickness="1">	
 				</Button>
 
-				<Button Content="Launch" Command="{Binding LaunchApp}" IsEnabled="{Binding IsLaunchAble}" Margin="4 0" Foreground="White" BorderThickness="1">
+				<Button Content="Install" Command="{Binding LaunchApp}" IsEnabled="{Binding IsLaunchAble}" Margin="4 0" Foreground="White" BorderThickness="1">
 				</Button>
 
 				<Button Content="Close" Command="{Binding CloseWin}" Margin="4 0 8 0" Foreground="White" BorderThickness="1">

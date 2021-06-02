@@ -304,7 +304,7 @@ namespace TechAppLauncher.ViewModels
                             {
                                 //success
                                 SelectedAppRefFile = this._refFileInfo.FileName + $" - installed {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}";
-                                messageBoxText = "Success! \r\n" + SelectedAppRefFile;
+                                messageBoxText = "Success! \r\nThe Plug-in has been installed";
                             }
                             else
                             {
