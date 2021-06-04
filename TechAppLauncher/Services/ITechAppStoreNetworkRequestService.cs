@@ -13,5 +13,7 @@ namespace TechAppLauncher.Services
         Task<List<string>?> GetAppDetailGalleries(string appUID);
         Task<RefFileInfo> GetFileAsync(string fileRefUrl);
         Task<Stream> LoadCoverBitmapAsync(string imgUrl);
+        Task<IList<UserDownloadSession>> GetUserDownloadSessionByUser(string userName);
+        Task<UserDownloadSession> AddUserDownloadSession(UserDownloadSession userDownloadSession);
     }
 }

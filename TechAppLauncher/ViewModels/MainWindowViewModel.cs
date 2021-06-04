@@ -122,6 +122,13 @@ namespace TechAppLauncher.ViewModels
                     var refFileDetailSelect = refFileDetails.Where(n => n.AppUID == result.AppId.ToString()).FirstOrDefault();
                     var refFileUrl = refFileDetailSelect != null ? refFileDetailSelect.FileRefUrl : null;
 
+                    SelectedAppTitle = result.Title;
+                    SelectedAppUID = result.AppUID;
+                    SelectedAppId = result.AppId.ToString();
+                    SelectedAppVersion = result.AppVersion != null ? result.AppVersion?.ToString() : "";
+                    SelectedAppDescription = result.Description;
+
+                    string info = "";
                     if (refFileUrl != null)
                     {
                         _refFileInfo = await techAppStoreService.GetFileAsync(refFileUrl);
@@ -129,20 +136,27 @@ namespace TechAppLauncher.ViewModels
                         if (_refFileInfo != null)
                         {
                             refFileUrl = _refFileInfo.FileName;
+                            SelectedAppRefFile = refFileUrl;
 
                             if (!string.IsNullOrEmpty(refFileUrl) && _refFileInfo.IsAvailable)
                             {
-                                this.IsLaunchAble = true;
+                                var userName = Environment.UserName;
+                                var userDownloadSessions = await techAppStoreService.GetUserDownloadSessionByUser(userName.Replace(".", "_"));
+
+                                if (userDownloadSessions != null && userDownloadSessions.Count > 0)
+                                {
+                                    if (userDownloadSessions.Any(n => n.AppUID.ToLower().Trim() == result.AppUID.ToLower().Trim()))
+                                    {
+                                        info = $"The Plug-in has been installed on {userDownloadSessions[0].InstallTimeStamp.ToString("yyyy-MM-dd HH:mm:ss")}";
+                                    }
+                                    else
+                                    {
+                                        this.IsLaunchAble = true;
+                                    }
+                                }
                             }
                         }
-                    }
-
-                    SelectedAppTitle = result.Title;
-                    SelectedAppUID = result.AppUID;
-                    SelectedAppId = result.AppId.ToString();
-                    SelectedAppVersion = result.AppVersion != null ? result.AppVersion?.ToString() : "";
-                    SelectedAppDescription = result.Description;
-                    SelectedAppRefFile = refFileUrl;
+                    } 
 
                     var appGalleries = await techAppStoreService.GetAppDetailGalleries(result.AppUID);
 
@@ -169,6 +183,12 @@ namespace TechAppLauncher.ViewModels
                                 string er = ex.Message;
                             }
                         }
+                    }
+
+                    if (!string.IsNullOrEmpty(info))
+                    {
+                        var messageBoxDialog = new MessageDialogViewModel(info, Enums.MessageBoxIconStyle.IconStyle.Info);
+                        await ShowMsgDialog.Handle(messageBoxDialog);
                     }
                 }
                 else
@@ -280,7 +300,6 @@ namespace TechAppLauncher.ViewModels
                     string? ocean2019Home_x64 = Environment.GetEnvironmentVariable("OCEAN2019HOME_x64");
                     //string? userProfile = Environment.GetEnvironmentVariable("USERPROFILE");
 
-
                     if (!string.IsNullOrEmpty(ocean2019Home) && !string.IsNullOrEmpty(ocean2019Home_x64))
                     {
                         try
@@ -305,6 +324,17 @@ namespace TechAppLauncher.ViewModels
                                 //success
                                 SelectedAppRefFile = this._refFileInfo.FileName + $" - installed {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}";
                                 messageBoxText = "Success! \r\nThe Plug-in has been installed";
+
+                                var rec = techAppStoreService.AddUserDownloadSession(new UserDownloadSession()
+                                {
+                                    AppId = Convert.ToInt64(SelectedAppId),
+                                    AppUID = SelectedAppUID,
+                                    Title = SelectedAppTitle,
+                                    UserName = Environment.UserName,
+                                    Status = "completed",
+                                    Remark = "",
+                                    InstallTimeStamp = DateTime.Now
+                                });
                             }
                             else
                             {

@@ -168,6 +168,89 @@ namespace TechAppLauncher.Services
             }
         }
 
+        public async Task<IList<UserDownloadSession>> GetUserDownloadSessionByUser(string userName)
+        {
+            string url = @"http://10.14.161.44/TechAppLauncherAPI/api/TechAppLauncher/GetUserDownloadSessionsByUsername/" + userName;
+            var request = new HttpRequestMessage()
+            {
+                RequestUri = new Uri(url),
+                Method = HttpMethod.Get,
+            };
+
+            request.Headers.Accept.Clear();
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            s_httpClient = new HttpClient(_handler);
+            s_httpClient.DefaultRequestHeaders.Accept.Clear();
+            s_httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            List<UserDownloadSession> userDownloadSessions = null;
+
+            try
+            {
+
+                var response = await s_httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead);
+
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+
+                    if (content != null && !string.IsNullOrEmpty(content))
+                    {
+                        userDownloadSessions = JsonConvert.DeserializeObject<List<UserDownloadSession>>(content);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+            return userDownloadSessions;
+        }
+
+        public async Task<UserDownloadSession> AddUserDownloadSession(UserDownloadSession userDownloadSession)
+        {
+            string url = @"http://10.14.161.44/TechAppLauncherAPI/api/TechAppLauncher/AddUserDownloadSession/";
+            var request = new HttpRequestMessage()
+            {
+                RequestUri = new Uri(url),
+                Method = HttpMethod.Post,
+            };
+
+            request.Headers.Accept.Clear();
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            s_httpClient = new HttpClient(_handler);
+            s_httpClient.DefaultRequestHeaders.Accept.Clear();
+            s_httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            request.Content = new StringContent(JsonConvert.SerializeObject(userDownloadSession), Encoding.UTF8, "application/json");
+            UserDownloadSession userDownloadSessionFromDB = null;
+
+            try
+            {
+
+                var response = await s_httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead);
+
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+
+                    if (content != null && !string.IsNullOrEmpty(content))
+                    {
+                        userDownloadSessionFromDB = JsonConvert.DeserializeObject<UserDownloadSession>(content);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+            return userDownloadSessionFromDB;
+        }
+
         public async Task<RefFileInfo> GetFileAsync(string fileRefUrl)
         {
             var request = new HttpRequestMessage()
