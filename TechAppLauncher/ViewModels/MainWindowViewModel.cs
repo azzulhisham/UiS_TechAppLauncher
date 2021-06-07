@@ -14,6 +14,9 @@ using System.Linq;
 using TechAppLauncher.Models;
 using System.IO;
 using System.IO.Compression;
+using Avalonia;
+using System.Runtime.InteropServices;
+using System.Reflection;
 
 namespace TechAppLauncher.ViewModels
 {
@@ -37,6 +40,8 @@ namespace TechAppLauncher.ViewModels
         private bool _isLaunchAble;
         private bool _isBusy;
 
+        private string _appTitleBar;
+
         private string _selectedAppId;
         private string _selectedAppUID;
         private string _selectedAppTitle;
@@ -44,8 +49,15 @@ namespace TechAppLauncher.ViewModels
         private string _selectedAppDescription;
         private string _selectedAppRefFile;
 
+
         private IList<RefFileDetail> refFileDetails;
 
+
+        public string AppTitleBar
+        {
+            get => _appTitleBar;
+            set => this.RaiseAndSetIfChanged(ref _appTitleBar, value);
+        }
 
         public bool CollectionEmpty
         {
@@ -97,13 +109,37 @@ namespace TechAppLauncher.ViewModels
 
         public MainWindowViewModel()
         {
+            var assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version; 
+            AppTitleBar = $"Tech App Store - Ver. : {assemblyVersion.Major}.{assemblyVersion.MajorRevision}.{assemblyVersion.Build}.{assemblyVersion.Revision}";
+
             ITechAppStoreNetworkRequestService techAppStoreService = new TechAppStoreService();
             ShowAppDialog = new Interaction<AppStoreViewModel, AppViewModel?>();
             ShowMsgDialog = new Interaction<MessageDialogViewModel, MessageDialogViewModel>();
 
-
             SelectAppCommand = ReactiveCommand.CreateFromTask(async () =>
             {
+                var versionControl = await techAppStoreService.GetLauncherVersion();
+
+                if (versionControl != null)
+                {
+                    if (assemblyVersion.Major < versionControl.Major || assemblyVersion.MajorRevision < versionControl.MajorRevision ||
+                        assemblyVersion.Build < versionControl.Minor || assemblyVersion.Revision < versionControl.MinorRevision)
+                    {
+                        string messageBoxText = "There is a newer version available.\r\nKindly update your app before start.";
+                        var messageBoxDialog = new MessageDialogViewModel(messageBoxText, Enums.MessageBoxIconStyle.IconStyle.Warning);
+                        await ShowMsgDialog.Handle(messageBoxDialog);
+
+                        return;
+                    }
+                }
+                else
+                {
+                    string messageBoxText = "Your system is not in the correct network.\r\nThis app will not work correctly.";
+                    var messageBoxDialog = new MessageDialogViewModel(messageBoxText, Enums.MessageBoxIconStyle.IconStyle.Warning);
+                    await ShowMsgDialog.Handle(messageBoxDialog);
+                }
+
+
                 var store = new AppStoreViewModel();
                 var result = await ShowAppDialog.Handle(store);
 
@@ -207,9 +243,9 @@ namespace TechAppLauncher.ViewModels
                 await LaunchApplication();
             });
 
+
             this.WhenAnyValue(x => x.Apps.Count)
                 .Subscribe(x => CollectionEmpty = x == 0);
-
         }
 
         public bool IsBusy
@@ -380,5 +416,6 @@ namespace TechAppLauncher.ViewModels
                 Thread.Sleep(1);
             }
         }
+
     }
 }

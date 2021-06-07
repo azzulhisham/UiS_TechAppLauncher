@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,6 +22,8 @@ namespace TechAppLauncher.ViewModels
         private bool _isBusy;
         private bool _isSearchAble;
 
+        private string _appTitleBar;
+
         private string? _searchText;
         private IList<Models.App> _apps;
 
@@ -28,6 +31,12 @@ namespace TechAppLauncher.ViewModels
         public ReactiveCommand<Unit, AppViewModel?> GetAppSelectCommand { get; }
         public ReactiveCommand<Unit, AppViewModel?> GetAppSelectCommandClose { get; }
 
+
+        public string AppTitleBar
+        {
+            get => _appTitleBar;
+            set => this.RaiseAndSetIfChanged(ref _appTitleBar, value);
+        }
 
         public AppViewModel? SelectedApp
         {
@@ -65,6 +74,9 @@ namespace TechAppLauncher.ViewModels
 
         public AppStoreViewModel()
         {
+            var assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version;
+            AppTitleBar = $"Tech App Store - Ver. : {assemblyVersion.Major}.{assemblyVersion.MajorRevision}.{assemblyVersion.Build}.{assemblyVersion.Revision}";
+
             this.WhenAnyValue(x => x.SearchText)
                 .Throttle(TimeSpan.FromMilliseconds(400))
                 .ObserveOn(RxApp.MainThreadScheduler)

@@ -25,7 +25,7 @@
 
 		<StackPanel Background="#00a19c">
 			<TextBlock TextAlignment="Center" Foreground="White" Margin="0,8,0,0" FontSize="18">Petronas</TextBlock>
-			<TextBlock TextAlignment="Center" Foreground="White" FontSize="12">Tech App Store</TextBlock>
+			<TextBlock TextAlignment="Center" Foreground="White" FontSize="12" Text="{Binding AppTitleBar}"></TextBlock>
 		</StackPanel>
 		<Panel Margin="40">
 			<local:AppStoreView />

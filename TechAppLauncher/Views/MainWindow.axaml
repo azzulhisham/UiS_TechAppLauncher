@@ -55,7 +55,7 @@
 
 		<StackPanel Background="#00a19c" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="5">
 			<TextBlock TextAlignment="Center" Foreground="White" FontSize="18" Padding="0 8 0 0">Petronas</TextBlock>
-			<TextBlock TextAlignment="Center" Foreground="White" FontSize="12" Padding="0 0 0 8">Tech App Store</TextBlock>
+			<TextBlock TextAlignment="Center" Foreground="White" FontSize="12" Padding="0 0 0 8" Text="{Binding AppTitleBar}"></TextBlock>
 		</StackPanel>
 
 		<Panel Background="#00a19c" Grid.Column="6" Grid.Row="1">

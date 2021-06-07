@@ -7,6 +7,7 @@ namespace TechAppLauncher.Services
 {
     public interface ITechAppStoreNetworkRequestService
     {
+        Task<LauncherVersion> GetLauncherVersion();
         Task DownloadFileAsync(RefFileInfo refFileInfo, string targetPath);
         Task<IList<Models.App>> GetAllAsync();
         Task<IList<RefFileDetail>> GetAllRefFilesAsync();

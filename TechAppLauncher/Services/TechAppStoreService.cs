@@ -251,6 +251,49 @@ namespace TechAppLauncher.Services
             return userDownloadSessionFromDB;
         }
 
+        public async Task<LauncherVersion> GetLauncherVersion()
+        {
+            string url = @"http://10.14.161.44/TechAppLauncherAPI/api/TechAppLauncher/GetLauncherVersion/";
+            var request = new HttpRequestMessage()
+            {
+                RequestUri = new Uri(url),
+                Method = HttpMethod.Get,
+            };
+            
+            request.Headers.Accept.Clear();
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            s_httpClient = new HttpClient(_handler);
+            s_httpClient.DefaultRequestHeaders.Accept.Clear();
+            s_httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            s_httpClient.Timeout = GetTimeOut(3);
+
+            LauncherVersion launcherVersion = null;
+
+            try
+            {
+
+                var response = await s_httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead);
+
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+
+                    if (content != null && !string.IsNullOrEmpty(content))
+                    {
+                        launcherVersion = JsonConvert.DeserializeObject<LauncherVersion>(content);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+            return launcherVersion;
+        }
+
+
         public async Task<RefFileInfo> GetFileAsync(string fileRefUrl)
         {
             var request = new HttpRequestMessage()
@@ -294,6 +337,12 @@ namespace TechAppLauncher.Services
                     await s.CopyToAsync(fs);
                 }
             }
+        }
+
+        private TimeSpan GetTimeOut(int seconds)
+        {
+            DateTime now = DateTime.Now;
+            return now.AddSeconds(seconds) - now;
         }
     }
 }
