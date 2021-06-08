@@ -17,6 +17,7 @@ using System.IO.Compression;
 using Avalonia;
 using System.Runtime.InteropServices;
 using System.Reflection;
+using System.Timers;
 
 namespace TechAppLauncher.ViewModels
 {
@@ -51,6 +52,7 @@ namespace TechAppLauncher.ViewModels
 
 
         private IList<RefFileDetail> refFileDetails;
+        private System.Timers.Timer timer_CheckVersion = new System.Timers.Timer();
 
 
         public string AppTitleBar
@@ -69,6 +71,12 @@ namespace TechAppLauncher.ViewModels
         {
             get => _isLaunchAble;
             set => this.RaiseAndSetIfChanged(ref _isLaunchAble, value);
+        }
+
+        public bool IsBusy
+        {
+            get => _isBusy;
+            set => this.RaiseAndSetIfChanged(ref _isBusy, value);
         }
 
         public string SelectedAppTitle
@@ -183,7 +191,16 @@ namespace TechAppLauncher.ViewModels
                                 {
                                     if (userDownloadSessions.Any(n => n.AppUID.ToLower().Trim() == result.AppUID.ToLower().Trim()))
                                     {
-                                        info = $"The Plug-in has been installed on {userDownloadSessions[0].InstallTimeStamp.ToString("yyyy-MM-dd HH:mm:ss")}";
+                                        var chkUserDownloadSessions = userDownloadSessions.Where(n => n.AppUID.ToLower().Trim() == result.AppUID.ToLower().Trim() && n.Status.Trim().ToLower() == "completed").ToList();
+
+                                        if (chkUserDownloadSessions != null && chkUserDownloadSessions.Count > 0)
+                                        {
+                                            info = $"The Plug-in has been installed on {userDownloadSessions[0].InstallTimeStamp.ToString("yyyy-MM-dd HH:mm:ss")}";
+                                        }
+                                        else
+                                        {
+                                            this.IsLaunchAble = true;
+                                        }
                                     }
                                     else
                                     {
@@ -235,6 +252,9 @@ namespace TechAppLauncher.ViewModels
 
             CloseWin = ReactiveCommand.Create(() => 
             {
+                timer_CheckVersion.Enabled = false;
+                timer_CheckVersion.Dispose();
+
                 return this;
             });
 
@@ -246,13 +266,37 @@ namespace TechAppLauncher.ViewModels
 
             this.WhenAnyValue(x => x.Apps.Count)
                 .Subscribe(x => CollectionEmpty = x == 0);
+
+
+            //timer_CheckVersion.Enabled = false;
+            //timer_CheckVersion.Elapsed += new ElapsedEventHandler(OnTimerEvent);
+
+            //timer_CheckVersion.Interval = 20 * 1000;
+            //timer_CheckVersion.Enabled = true;
         }
 
-        public bool IsBusy
+        private async void OnTimerEvent(object source, ElapsedEventArgs e)
         {
-            get => _isBusy;
-            set => this.RaiseAndSetIfChanged(ref _isBusy, value);
+            timer_CheckVersion.Enabled = false;
+            ITechAppStoreNetworkRequestService techAppStoreService = new TechAppStoreService();
+
+            var assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version;
+            var versionControl = await techAppStoreService.GetLauncherVersion();
+
+            if (versionControl != null)
+            {
+                if (assemblyVersion.Major < versionControl.Major || assemblyVersion.MajorRevision < versionControl.MajorRevision ||
+                    assemblyVersion.Build < versionControl.Minor || assemblyVersion.Revision < versionControl.MinorRevision)
+                {
+                    string messageBoxText = "There is a newer version available.\r\nKindly update your app before start.";
+                    var messageBoxDialog = new MessageDialogViewModel(messageBoxText, Enums.MessageBoxIconStyle.IconStyle.Warning);
+                    await ShowMsgDialog.Handle(messageBoxDialog);
+                }
+            }
+
+            timer_CheckVersion.Enabled = true;
         }
+
 
         private async Task LoadImage(CancellationToken cancellationToken)
         {
