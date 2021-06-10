@@ -156,7 +156,8 @@ namespace TechAppLauncher.ViewModels
                     refFileDetails = await techAppStoreService.GetAllRefFilesAsync();
                 }
 
-                this.IsLaunchAble = false;
+                bool isLaunchAble = false;
+                this.IsLaunchAble = isLaunchAble;
                 Apps.Clear();
 
                 if (result != null && refFileDetails != null)
@@ -197,26 +198,14 @@ namespace TechAppLauncher.ViewModels
                                         if (chkUserDownloadSessions != null && chkUserDownloadSessions.Count > 0)
                                         {
                                             info = $"The Plug-in has been installed on {userDownloadSessions[0].InstallTimeStamp.ToString("yyyy-MM-dd HH:mm:ss")}";
-                                            this.IsLaunchAble = true;
-                                        }
-                                        else
-                                        {
-                                            this.IsLaunchAble = true;
                                         }
                                     }
-                                    else
-                                    {
-                                        this.IsLaunchAble = true;
-                                    }
                                 }
-                                else
-                                {
-                                    this.IsLaunchAble = true;
-                                }
+
+                                isLaunchAble = true;
                             }
                         }
                     }
-
 
                     var appGalleries = await techAppStoreService.GetAppDetailGalleries(result.AppUID);
 
@@ -250,10 +239,8 @@ namespace TechAppLauncher.ViewModels
                         var messageBoxDialog = new MessageDialogViewModel(info, Enums.MessageBoxIconStyle.IconStyle.Info);
                         await ShowMsgDialog.Handle(messageBoxDialog);
                     }
-                }
-                else
-                {
-                    this.IsLaunchAble = false;
+
+                    this.IsLaunchAble = isLaunchAble;
                 }
             });
 
