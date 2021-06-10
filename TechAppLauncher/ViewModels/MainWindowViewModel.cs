@@ -171,6 +171,7 @@ namespace TechAppLauncher.ViewModels
                     SelectedAppId = result.AppId.ToString();
                     SelectedAppVersion = result.AppVersion != null ? result.AppVersion?.ToString() : "";
                     SelectedAppDescription = result.Description;
+                    SelectedAppRefFile = "";
 
                     string info = "";
                     if (refFileUrl != null)
@@ -214,14 +215,6 @@ namespace TechAppLauncher.ViewModels
                                 }
                             }
                         }
-                        else
-                        {
-                            SelectedAppRefFile = "";
-                        }
-                    }
-                    else
-                    {
-                        SelectedAppRefFile = "";
                     }
 
 
