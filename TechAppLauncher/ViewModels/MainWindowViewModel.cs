@@ -196,6 +196,7 @@ namespace TechAppLauncher.ViewModels
                                         if (chkUserDownloadSessions != null && chkUserDownloadSessions.Count > 0)
                                         {
                                             info = $"The Plug-in has been installed on {userDownloadSessions[0].InstallTimeStamp.ToString("yyyy-MM-dd HH:mm:ss")}";
+                                            this.IsLaunchAble = true;
                                         }
                                         else
                                         {
@@ -207,9 +208,22 @@ namespace TechAppLauncher.ViewModels
                                         this.IsLaunchAble = true;
                                     }
                                 }
+                                else
+                                {
+                                    this.IsLaunchAble = true;
+                                }
                             }
                         }
-                    } 
+                        else
+                        {
+                            SelectedAppRefFile = "";
+                        }
+                    }
+                    else
+                    {
+                        SelectedAppRefFile = "";
+                    }
+
 
                     var appGalleries = await techAppStoreService.GetAppDetailGalleries(result.AppUID);
 

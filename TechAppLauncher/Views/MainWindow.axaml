@@ -66,10 +66,10 @@
 
 		<Panel Background="#00a19c" Grid.Column="1" Grid.Row="8"  Grid.ColumnSpan="6" >
 			<StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-				<Button Content="Select App." Command="{Binding SelectAppCommand}" IsVisible="{Binding !CollectionEmpty}" Margin="4 0" Foreground="White" BorderThickness="1">	
+				<Button Content="Install" Command="{Binding LaunchApp}" IsEnabled="{Binding IsLaunchAble}" IsVisible="{Binding !CollectionEmpty}" Margin="4 0 30 0" Padding="20 5" Foreground="Black" BorderThickness="1" Background="White">
 				</Button>
 
-				<Button Content="Install" Command="{Binding LaunchApp}" IsEnabled="{Binding IsLaunchAble}" Margin="4 0" Foreground="White" BorderThickness="1">
+				<Button Content="Select App." Command="{Binding SelectAppCommand}" IsVisible="{Binding !CollectionEmpty}" Margin="4 0" Foreground="White" BorderThickness="1">	
 				</Button>
 
 				<Button Content="Close" Command="{Binding CloseWin}" Margin="4 0 8 0" Foreground="White" BorderThickness="1">

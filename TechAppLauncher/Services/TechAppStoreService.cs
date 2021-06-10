@@ -266,7 +266,7 @@ namespace TechAppLauncher.Services
             s_httpClient = new HttpClient(_handler);
             s_httpClient.DefaultRequestHeaders.Accept.Clear();
             s_httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            s_httpClient.Timeout = GetTimeOut(3);
+            s_httpClient.Timeout = GetTimeOut(5);
 
             LauncherVersion launcherVersion = null;
 
