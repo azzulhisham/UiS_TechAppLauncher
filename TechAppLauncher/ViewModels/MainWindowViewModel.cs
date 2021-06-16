@@ -18,6 +18,7 @@ using Avalonia;
 using System.Runtime.InteropServices;
 using System.Reflection;
 using System.Timers;
+using Avalonia.Controls;
 
 namespace TechAppLauncher.ViewModels
 {
@@ -49,6 +50,9 @@ namespace TechAppLauncher.ViewModels
         private string _selectedAppVersion;
         private string _selectedAppDescription;
         private string _selectedAppRefFile;
+
+        private string _installFromFile;
+        private string _downloadAppPath;
 
 
         private IList<RefFileDetail> refFileDetails;
@@ -115,6 +119,33 @@ namespace TechAppLauncher.ViewModels
             set => this.RaiseAndSetIfChanged(ref _selectedAppRefFile, value);
         }
 
+        public string InstallFromFile
+        {
+            get => _installFromFile;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _installFromFile, value);
+            }
+        }
+
+        public string DownloadAppPath
+        {
+            get => _downloadAppPath;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _downloadAppPath, value);
+            }
+        }
+
+        public async Task DoSomething()
+        {
+            //ShowMsgDialog = new Interaction<MessageDialogViewModel, MessageDialogViewModel>();
+            string messageBoxText = _installFromFile;
+            var messageBoxDialog = new MessageDialogViewModel(messageBoxText, Enums.MessageBoxIconStyle.IconStyle.Warning);
+            await ShowMsgDialog.Handle(messageBoxDialog);
+        }
+
+
         public MainWindowViewModel()
         {
             var assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version; 
@@ -146,7 +177,6 @@ namespace TechAppLauncher.ViewModels
                     var messageBoxDialog = new MessageDialogViewModel(messageBoxText, Enums.MessageBoxIconStyle.IconStyle.Warning);
                     await ShowMsgDialog.Handle(messageBoxDialog);
                 }
-
 
                 var store = new AppStoreViewModel();
                 var result = await ShowAppDialog.Handle(store);
@@ -305,7 +335,7 @@ namespace TechAppLauncher.ViewModels
             }
         }
 
-        private async Task LaunchApplication()
+        public async Task LaunchApplication(string filePath = "")
         {
             this.IsLaunchAble = false;
             this.IsBusy = true;
@@ -316,6 +346,16 @@ namespace TechAppLauncher.ViewModels
             if (!Directory.Exists(targetPath))
             {
                 Directory.CreateDirectory(targetPath);
+            }
+
+
+            //file attached option
+            if (!string.IsNullOrEmpty(filePath))
+            {
+                this._refFileInfo = new RefFileInfo()
+                {
+                    FileName = Path.GetFileName(filePath)
+                };
             }
 
 
@@ -341,7 +381,24 @@ namespace TechAppLauncher.ViewModels
 
             if (!File.Exists(workingZipFilePath))
             {
-                await techAppStoreService.DownloadFileAsync(this._refFileInfo, workingFolder);
+                //Do not download from sever whenever attachment is provided
+                if (string.IsNullOrEmpty(filePath))
+                {
+                    await techAppStoreService.DownloadFileAsync(this._refFileInfo, workingFolder);
+                }
+                else
+                {
+                    File.Copy(filePath, workingZipFilePath, true);
+
+                    try
+                    {
+                        File.Delete(filePath);
+                    }
+                    catch (Exception ex)
+                    {
+                        string er = ex.Message;
+                    }
+                }
             }
 
             if (File.Exists(workingPipFilePath))
@@ -412,28 +469,36 @@ namespace TechAppLauncher.ViewModels
                             }
                             else
                             {
+                                if (Directory.Exists(workingFolder))
+                                {
+                                    Directory.Delete(workingFolder, true);
+                                }
+
                                 messageBoxText = "Fail! \r\n" + $"ExitCode = {process.ExitCode}";
                             }
 
                         }
                         catch (Exception ex)
                         {
+                            if (Directory.Exists(workingFolder))
+                            {
+                                Directory.Delete(workingFolder, true);
+                            }
+
                             messageBoxText = "Fail! \r\n" + ex.Message;
                         }
                     }
                     else
                     {
+                        if (Directory.Exists(workingFolder))
+                        {
+                            Directory.Delete(workingFolder, true);
+                        }
+
                         messageBoxText = "Ops! Petrel is not available on your system.";
                         await Task.Run(() => Sleep(3));
                     }
 
-                    //remove working folder after all task done
-                    //if (Directory.Exists(workingFolder))
-                    //{
-                    //    Directory.Delete(workingFolder, true);
-                    //}
-
-                    this.IsBusy = false;
                     var messageBoxDialog = new MessageDialogViewModel(messageBoxText, (messageBoxText.ToLower().StartsWith("success") ? Enums.MessageBoxIconStyle.IconStyle.Success : Enums.MessageBoxIconStyle.IconStyle.Error));
                     await ShowMsgDialog.Handle(messageBoxDialog);
                 }
@@ -443,6 +508,60 @@ namespace TechAppLauncher.ViewModels
                 var messageBoxDialog = new MessageDialogViewModel("Ops! Looks like there is some techincal issues exists on your system.\r\nKindly refer to the Tech. App. Developer.", Enums.MessageBoxIconStyle.IconStyle.Error);
                 await ShowMsgDialog.Handle(messageBoxDialog);
             }
+
+            this.IsBusy = false;
+        }
+
+        public async Task DownloadApplication()
+        {
+            this.IsLaunchAble = false;
+            this.IsBusy = true;
+
+            string messageBoxText = "";
+            string targetPath = DownloadAppPath;
+
+            if (!Directory.Exists(targetPath))
+            {
+                Directory.CreateDirectory(targetPath);
+            }
+
+            string workingZipFilePath = Path.Combine(targetPath, this._refFileInfo.FileName);
+
+            ITechAppStoreNetworkRequestService techAppStoreService = new TechAppStoreService();
+
+            if (!File.Exists(workingZipFilePath))
+            {
+                await techAppStoreService.DownloadFileAsync(this._refFileInfo, targetPath);
+            }
+
+            if (File.Exists(workingZipFilePath))
+            {
+                //success
+                SelectedAppRefFile = this._refFileInfo.FileName + $" - downloaded {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}";
+                messageBoxText = "Success! \r\nThe Plug-in has been downloaded";
+
+                var rec = techAppStoreService.AddUserDownloadSession(new UserDownloadSession()
+                {
+                    AppId = Convert.ToInt64(SelectedAppId),
+                    AppUID = SelectedAppUID,
+                    Title = SelectedAppTitle,
+                    UserName = Environment.UserName,
+                    Status = "downloaded",
+                    Remark = "",
+                    InstallTimeStamp = DateTime.Now
+                });
+
+            
+                var messageBoxDialog = new MessageDialogViewModel(messageBoxText, (messageBoxText.ToLower().StartsWith("success") ? Enums.MessageBoxIconStyle.IconStyle.Success : Enums.MessageBoxIconStyle.IconStyle.Error));
+                await ShowMsgDialog.Handle(messageBoxDialog);
+            }
+            else
+            {
+                var messageBoxDialog = new MessageDialogViewModel("Ops! Looks like there is some techincal issues exists on your system.\r\nKindly refer to the Tech. App. Developer.", Enums.MessageBoxIconStyle.IconStyle.Error);
+                await ShowMsgDialog.Handle(messageBoxDialog);
+            }
+
+            this.IsBusy = false;
         }
 
         private async Task Sleep(int seconds)

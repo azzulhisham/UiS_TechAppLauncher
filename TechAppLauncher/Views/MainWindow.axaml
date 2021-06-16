@@ -59,29 +59,37 @@
 		</StackPanel>
 
 		<Panel Background="#00a19c" Grid.Column="6" Grid.Row="1">
-			<Button Content="Select App." Command="{Binding SelectAppCommand}" HorizontalAlignment="Right" Margin="8 8" Foreground="White">
+			<Button Content="Select App." Command="{Binding SelectAppCommand}" HorizontalAlignment="Right" Margin="8 8" Foreground="White" ToolTip.Tip="Click here to select a Plugin.">
 				<PathIcon Data="{StaticResource app_store_regular}" />
-			</Button>			
+			</Button>
 		</Panel>
 
 		<Panel Background="#00a19c" Grid.Column="1" Grid.Row="8"  Grid.ColumnSpan="6" >
 			<StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-				<Button Content="Install" Command="{Binding LaunchApp}" IsEnabled="{Binding IsLaunchAble}" IsVisible="{Binding !CollectionEmpty}" Margin="4 0 30 0" Padding="20 5" Foreground="Black" BorderThickness="1" Background="White">
+				<Button Content="Download" Click="OnDownloadAppClicked" IsEnabled="{Binding IsLaunchAble}" IsVisible="{Binding !CollectionEmpty}" Margin="4 0 20 0" Padding="20 5" Foreground="Black" BorderThickness="1" Background="White" BorderBrush="Black" ToolTip.Tip="Click here to download the Plugin.">
+				</Button>
+				
+				<Button Content="Install" Command="{Binding LaunchApp}" IsEnabled="{Binding IsLaunchAble}" IsVisible="{Binding !CollectionEmpty}" Margin="4 0 30 0" Padding="20 5" Foreground="Black" BorderThickness="1" Background="White" BorderBrush="Black" ToolTip.Tip="Click here to install the Plugin.">
 				</Button>
 
-				<Button Content="Select App." Command="{Binding SelectAppCommand}" IsVisible="{Binding !CollectionEmpty}" Margin="4 0" Foreground="White" BorderThickness="1">	
+				<Button Content="Select App." Command="{Binding SelectAppCommand}" IsVisible="{Binding !CollectionEmpty}" Margin="4 0" Foreground="White" BorderThickness="1" ToolTip.Tip="Click here to select a Plugin.">	
 				</Button>
 
-				<Button Content="Close" Command="{Binding CloseWin}" Margin="4 0 8 0" Foreground="White" BorderThickness="1">
+				<Button Content="Close" Command="{Binding CloseWin}" Margin="4 0 8 0" Foreground="White" BorderThickness="1" ToolTip.Tip="Click here to close this launcher.">
 				</Button>				
 			</StackPanel>	
 		</Panel>
 
 		<Panel Background="#00a19c" Grid.Column="1" Grid.Row="2"  Grid.ColumnSpan="6" Grid.RowSpan="6" IsVisible="{Binding CollectionEmpty}">
 			<StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-				<TextBlock Text="Let's get started by selecting an app..." Foreground="White"  />
+				<TextBlock Text="Let's get started by selecting an app..." Foreground="White" TextAlignment="Center" />
 				
-				<Button Content="Select App." Command="{Binding SelectAppCommand}" HorizontalAlignment="Center" Margin="0 8" Foreground="White" BorderThickness="1">
+				<Button Content="Select App." Command="{Binding SelectAppCommand}" HorizontalAlignment="Center" Margin="0 8" Foreground="Black" BorderThickness="1" Background="White" BorderBrush="Black" ToolTip.Tip="Click here to select a Plugin.">
+				</Button>
+
+				<TextBlock Text="** Click the button below to start installation if you have the downloaded Plugin" TextAlignment="Center" Foreground="GreenYellow" Margin="0 20 0 0" />
+
+				<Button Content="Install App. From Downloaded File" Click="OnInstallAppFromFileClicked" HorizontalAlignment="Center" Margin="0 8" Foreground="White" BorderThickness="1" ToolTip.Tip="Click here to start installation if downloaded Plugin is provided.">
 				</Button>
 			</StackPanel>
 		</Panel>

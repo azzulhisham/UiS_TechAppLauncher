@@ -1,4 +1,6 @@
-﻿using ReactiveUI;
+﻿using Avalonia.Controls;
+using Avalonia.Interactivity;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -30,7 +32,6 @@ namespace TechAppLauncher.ViewModels
         public ObservableCollection<AppViewModel> SelectedResults { get; } = new();
         public ReactiveCommand<Unit, AppViewModel?> GetAppSelectCommand { get; }
         public ReactiveCommand<Unit, AppViewModel?> GetAppSelectCommandClose { get; }
-
 
         public string AppTitleBar
         {
@@ -82,6 +83,7 @@ namespace TechAppLauncher.ViewModels
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(DoSearch!);
 
+
             GetAppSelectCommand = ReactiveCommand.Create(() =>
             {
                 return SelectedApp;
@@ -95,6 +97,7 @@ namespace TechAppLauncher.ViewModels
 
             ListAllApp();
         }
+
 
         private async void DoSearch(string s)
         {
