@@ -335,6 +335,12 @@ namespace TechAppLauncher.ViewModels
             }
         }
 
+        public async Task RaiseMessage(string msg)
+        {
+            var messageBoxDialog = new MessageDialogViewModel(msg, Enums.MessageBoxIconStyle.IconStyle.Warning);
+            await ShowMsgDialog.Handle(messageBoxDialog);
+        }
+
         public async Task LaunchApplication(string filePath = "")
         {
             this.IsLaunchAble = false;

@@ -36,12 +36,14 @@ namespace TechAppLauncher.Views
             OpenFolderDialog openFolderDialog = new OpenFolderDialog();
             string result = await openFolderDialog.ShowAsync(this);
 
+            var context = this.DataContext as MainWindowViewModel;
+           
             if (string.IsNullOrEmpty(result))
             {
+                await context.RaiseMessage("Please select a folder from your system.");
                 return;
             }
 
-            var context = this.DataContext as MainWindowViewModel;
             context.DownloadAppPath = result;
             await context.DownloadApplication();
         }
@@ -50,18 +52,20 @@ namespace TechAppLauncher.Views
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             string[] result = await openFileDialog.ShowAsync(this);
+            var context = this.DataContext as MainWindowViewModel;
 
             if (result.Length == 0)
             {
+                await context.RaiseMessage("Please select a downloaded Plugin from your system.");
                 return;
             }
 
             if (string.IsNullOrEmpty(result[0]))
             {
+                await context.RaiseMessage("Please select a downloaded Plugin from your system.");
                 return;
             }
 
-            var context = this.DataContext as MainWindowViewModel;
             context.InstallFromFile = result[0];
             await context.LaunchApplication(result[0]);
         }
