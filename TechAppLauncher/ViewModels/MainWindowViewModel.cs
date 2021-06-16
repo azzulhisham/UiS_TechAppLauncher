@@ -502,9 +502,24 @@ namespace TechAppLauncher.ViewModels
                     var messageBoxDialog = new MessageDialogViewModel(messageBoxText, (messageBoxText.ToLower().StartsWith("success") ? Enums.MessageBoxIconStyle.IconStyle.Success : Enums.MessageBoxIconStyle.IconStyle.Error));
                     await ShowMsgDialog.Handle(messageBoxDialog);
                 }
+                else
+                {
+                    if (Directory.Exists(workingFolder))
+                    {
+                        Directory.Delete(workingFolder, true);
+                    }
+
+                    var messageBoxDialog = new MessageDialogViewModel("Ops! Looks like this installation is currently not supported.\r\nKindly refer to the Tech. App. Developer.", Enums.MessageBoxIconStyle.IconStyle.Error);
+                    await ShowMsgDialog.Handle(messageBoxDialog);
+                }
             }
             else
             {
+                if (Directory.Exists(workingFolder))
+                {
+                    Directory.Delete(workingFolder, true);
+                }
+
                 var messageBoxDialog = new MessageDialogViewModel("Ops! Looks like there is some techincal issues exists on your system.\r\nKindly refer to the Tech. App. Developer.", Enums.MessageBoxIconStyle.IconStyle.Error);
                 await ShowMsgDialog.Handle(messageBoxDialog);
             }

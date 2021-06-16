@@ -89,7 +89,7 @@
 
 				<TextBlock Text="** Click the button below to start installation if you have the downloaded Plugin" TextAlignment="Center" Foreground="GreenYellow" Margin="0 20 0 0" />
 
-				<Button Content="Install App. From Downloaded File" Click="OnInstallAppFromFileClicked" HorizontalAlignment="Center" Margin="0 8" Foreground="White" BorderThickness="1" ToolTip.Tip="Click here to start installation if downloaded Plugin is provided.">
+				<Button Content="Install App. From Downloaded File" IsEnabled="{Binding !IsBusy}" Click="OnInstallAppFromFileClicked" HorizontalAlignment="Center" Margin="0 8" Foreground="White" BorderThickness="1" ToolTip.Tip="Click here to start installation if downloaded Plugin is provided.">
 				</Button>
 			</StackPanel>
 		</Panel>
