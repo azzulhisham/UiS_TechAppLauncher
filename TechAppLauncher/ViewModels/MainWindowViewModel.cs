@@ -19,16 +19,24 @@ using System.Runtime.InteropServices;
 using System.Reflection;
 using System.Timers;
 using Avalonia.Controls;
+using System.Xml;
 
 namespace TechAppLauncher.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase
     {
         public ICommand SelectAppCommand { get; }
+        public ICommand RemoveAppCommand { get; }
+
         public Interaction<AppStoreViewModel, AppViewModel?> ShowAppDialog { get; }
         public Interaction<MessageDialogViewModel, MessageDialogViewModel> ShowMsgDialog { get; }
+        public Interaction<RemoveAppViewModel, RemoveAppViewModel> ShowRemoveAppDialog { get; }
+
         public ObservableCollection<AppViewModel> Apps { get; } = new();
         public ObservableCollection<AppGalleryViewModel> Galleries { get; } = new();
+
+        public ObservableCollection<string> ItemsInSystem { get; } = new();
+
 
         public ReactiveCommand<Unit, Unit> LaunchApp { get; }
         public ReactiveCommand<Unit, MainWindowViewModel> CloseWin { get; }
@@ -39,6 +47,7 @@ namespace TechAppLauncher.ViewModels
         private RefFileInfo? _refFileInfo;
 
         private bool _collectionEmpty;
+        private bool _AppInSystemEmpty = true;
         private bool _isLaunchAble;
         private bool _isBusy;
 
@@ -54,6 +63,8 @@ namespace TechAppLauncher.ViewModels
         private string _installFromFile;
         private string _downloadAppPath;
 
+        private XmlDocument _xdoc = new XmlDocument();
+        private XmlNodeList _xnodes;
 
         private IList<RefFileDetail> refFileDetails;
         private System.Timers.Timer timer_CheckVersion = new System.Timers.Timer();
@@ -69,6 +80,12 @@ namespace TechAppLauncher.ViewModels
         {
             get => _collectionEmpty;
             set => this.RaiseAndSetIfChanged(ref _collectionEmpty, value);
+        }
+
+        public bool AppInSystemEmpty
+        {
+            get => _AppInSystemEmpty;
+            set => this.RaiseAndSetIfChanged(ref _AppInSystemEmpty, value);
         }
 
         public bool IsLaunchAble
@@ -141,7 +158,7 @@ namespace TechAppLauncher.ViewModels
         {
             //ShowMsgDialog = new Interaction<MessageDialogViewModel, MessageDialogViewModel>();
             string messageBoxText = _installFromFile;
-            var messageBoxDialog = new MessageDialogViewModel(messageBoxText, Enums.MessageBoxIconStyle.IconStyle.Warning);
+            var messageBoxDialog = new MessageDialogViewModel(messageBoxText, Enums.MessageBoxStyle.IconStyle.Warning);
             await ShowMsgDialog.Handle(messageBoxDialog);
         }
 
@@ -154,6 +171,7 @@ namespace TechAppLauncher.ViewModels
             ITechAppStoreNetworkRequestService techAppStoreService = new TechAppStoreService();
             ShowAppDialog = new Interaction<AppStoreViewModel, AppViewModel?>();
             ShowMsgDialog = new Interaction<MessageDialogViewModel, MessageDialogViewModel>();
+            ShowRemoveAppDialog = new Interaction<RemoveAppViewModel, RemoveAppViewModel>();
 
             SelectAppCommand = ReactiveCommand.CreateFromTask(async () =>
             {
@@ -165,7 +183,7 @@ namespace TechAppLauncher.ViewModels
                         assemblyVersion.Build < versionControl.Minor || assemblyVersion.Revision < versionControl.MinorRevision)
                     {
                         string messageBoxText = "There is a newer version available.\r\nKindly update your app before start.";
-                        var messageBoxDialog = new MessageDialogViewModel(messageBoxText, Enums.MessageBoxIconStyle.IconStyle.Warning);
+                        var messageBoxDialog = new MessageDialogViewModel(messageBoxText, Enums.MessageBoxStyle.IconStyle.Warning);
                         await ShowMsgDialog.Handle(messageBoxDialog);
 
                         return;
@@ -174,7 +192,7 @@ namespace TechAppLauncher.ViewModels
                 else
                 {
                     string messageBoxText = "Your system is not in the correct network.\r\nThis app will not work correctly.";
-                    var messageBoxDialog = new MessageDialogViewModel(messageBoxText, Enums.MessageBoxIconStyle.IconStyle.Warning);
+                    var messageBoxDialog = new MessageDialogViewModel(messageBoxText, Enums.MessageBoxStyle.IconStyle.Warning);
                     await ShowMsgDialog.Handle(messageBoxDialog);
                 }
 
@@ -266,12 +284,14 @@ namespace TechAppLauncher.ViewModels
 
                     if (!string.IsNullOrEmpty(info))
                     {
-                        var messageBoxDialog = new MessageDialogViewModel(info, Enums.MessageBoxIconStyle.IconStyle.Info);
+                        var messageBoxDialog = new MessageDialogViewModel(info, Enums.MessageBoxStyle.IconStyle.Info);
                         await ShowMsgDialog.Handle(messageBoxDialog);
                     }
 
                     this.IsLaunchAble = isLaunchAble;
                 }
+
+                LoadXmlContent();
             });
 
             CloseWin = ReactiveCommand.Create(() => 
@@ -285,18 +305,20 @@ namespace TechAppLauncher.ViewModels
             LaunchApp = ReactiveCommand.CreateFromTask(async () =>
             {
                 await LaunchApplication();
+                LoadXmlContent();
             });
 
+            RemoveAppCommand = ReactiveCommand.CreateFromTask(async () =>
+            {
+                var removeApp = new RemoveAppViewModel();
+                var result = await ShowRemoveAppDialog.Handle(removeApp);
+                LoadXmlContent();
+            });
 
             this.WhenAnyValue(x => x.Apps.Count)
                 .Subscribe(x => CollectionEmpty = x == 0);
 
-
-            //timer_CheckVersion.Enabled = false;
-            //timer_CheckVersion.Elapsed += new ElapsedEventHandler(OnTimerEvent);
-
-            //timer_CheckVersion.Interval = 20 * 1000;
-            //timer_CheckVersion.Enabled = true;
+            LoadXmlContent();
         }
 
         private async void OnTimerEvent(object source, ElapsedEventArgs e)
@@ -313,7 +335,7 @@ namespace TechAppLauncher.ViewModels
                     assemblyVersion.Build < versionControl.Minor || assemblyVersion.Revision < versionControl.MinorRevision)
                 {
                     string messageBoxText = "There is a newer version available.\r\nKindly update your app before start.";
-                    var messageBoxDialog = new MessageDialogViewModel(messageBoxText, Enums.MessageBoxIconStyle.IconStyle.Warning);
+                    var messageBoxDialog = new MessageDialogViewModel(messageBoxText, Enums.MessageBoxStyle.IconStyle.Warning);
                     await ShowMsgDialog.Handle(messageBoxDialog);
                 }
             }
@@ -337,7 +359,7 @@ namespace TechAppLauncher.ViewModels
 
         public async Task RaiseMessage(string msg)
         {
-            var messageBoxDialog = new MessageDialogViewModel(msg, Enums.MessageBoxIconStyle.IconStyle.Warning);
+            var messageBoxDialog = new MessageDialogViewModel(msg, Enums.MessageBoxStyle.IconStyle.Warning);
             await ShowMsgDialog.Handle(messageBoxDialog);
         }
 
@@ -505,7 +527,7 @@ namespace TechAppLauncher.ViewModels
                         await Task.Run(() => Sleep(3));
                     }
 
-                    var messageBoxDialog = new MessageDialogViewModel(messageBoxText, (messageBoxText.ToLower().StartsWith("success") ? Enums.MessageBoxIconStyle.IconStyle.Success : Enums.MessageBoxIconStyle.IconStyle.Error));
+                    var messageBoxDialog = new MessageDialogViewModel(messageBoxText, (messageBoxText.ToLower().StartsWith("success") ? Enums.MessageBoxStyle.IconStyle.Success : Enums.MessageBoxStyle.IconStyle.Error));
                     await ShowMsgDialog.Handle(messageBoxDialog);
                 }
                 else
@@ -515,7 +537,7 @@ namespace TechAppLauncher.ViewModels
                         Directory.Delete(workingFolder, true);
                     }
 
-                    var messageBoxDialog = new MessageDialogViewModel("Ops! Looks like this installation is currently not supported.\r\nKindly refer to the Tech. App. Developer.", Enums.MessageBoxIconStyle.IconStyle.Error);
+                    var messageBoxDialog = new MessageDialogViewModel("Ops! Looks like this installation is currently not supported.\r\nKindly refer to the Tech. App. Developer.", Enums.MessageBoxStyle.IconStyle.Error);
                     await ShowMsgDialog.Handle(messageBoxDialog);
                 }
             }
@@ -526,7 +548,7 @@ namespace TechAppLauncher.ViewModels
                     Directory.Delete(workingFolder, true);
                 }
 
-                var messageBoxDialog = new MessageDialogViewModel("Ops! Looks like there is some techincal issues exists on your system.\r\nKindly refer to the Tech. App. Developer.", Enums.MessageBoxIconStyle.IconStyle.Error);
+                var messageBoxDialog = new MessageDialogViewModel("Ops! Looks like there is some techincal issues exists on your system.\r\nKindly refer to the Tech. App. Developer.", Enums.MessageBoxStyle.IconStyle.Error);
                 await ShowMsgDialog.Handle(messageBoxDialog);
             }
 
@@ -573,12 +595,12 @@ namespace TechAppLauncher.ViewModels
                 });
 
             
-                var messageBoxDialog = new MessageDialogViewModel(messageBoxText, (messageBoxText.ToLower().StartsWith("success") ? Enums.MessageBoxIconStyle.IconStyle.Success : Enums.MessageBoxIconStyle.IconStyle.Error));
+                var messageBoxDialog = new MessageDialogViewModel(messageBoxText, (messageBoxText.ToLower().StartsWith("success") ? Enums.MessageBoxStyle.IconStyle.Success : Enums.MessageBoxStyle.IconStyle.Error));
                 await ShowMsgDialog.Handle(messageBoxDialog);
             }
             else
             {
-                var messageBoxDialog = new MessageDialogViewModel("Ops! Looks like there is some techincal issues exists on your system.\r\nKindly refer to the Tech. App. Developer.", Enums.MessageBoxIconStyle.IconStyle.Error);
+                var messageBoxDialog = new MessageDialogViewModel("Ops! Looks like there is some techincal issues exists on your system.\r\nKindly refer to the Tech. App. Developer.", Enums.MessageBoxStyle.IconStyle.Error);
                 await ShowMsgDialog.Handle(messageBoxDialog);
             }
 
@@ -595,5 +617,24 @@ namespace TechAppLauncher.ViewModels
             }
         }
 
+        private void LoadXmlContent()
+        {
+            _xdoc.Load(@"C:\Users\zulhisham\Downloads\PluginManagerSettings.xml");
+            _xnodes = _xdoc.GetElementsByTagName("Plugin");
+
+            AppInSystemEmpty = true;
+            ItemsInSystem.Clear();
+
+            foreach (XmlNode item in _xnodes)
+            {
+                var name = item.SelectSingleNode("Name") == null ? " - " : item.SelectSingleNode("Name").InnerText;
+                var typeNames = item.SelectSingleNode("PluginTypeName") == null ? " - " : item.SelectSingleNode("PluginTypeName").InnerText;
+
+                string[] typeName = typeNames.Split(new char[] { ',' });
+
+                ItemsInSystem.Add($"{name}       :{typeName[1].Trim()}");
+                AppInSystemEmpty = false;
+            }
+        }
     }
 }

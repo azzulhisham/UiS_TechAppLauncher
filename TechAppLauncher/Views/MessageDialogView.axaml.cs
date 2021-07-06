@@ -20,6 +20,8 @@ namespace TechAppLauncher.Views
 #endif
 
             this.WhenActivated(d => d(ViewModel.CloseWin.Subscribe(Close)));
+            this.WhenActivated(d => d(ViewModel.ButtonYes.Subscribe(Close)));
+            this.WhenActivated(d => d(ViewModel.ButtonNo.Subscribe(Close)));
         }
 
         private void InitializeComponent()

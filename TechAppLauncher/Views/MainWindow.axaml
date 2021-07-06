@@ -64,7 +64,14 @@
 			</Button>
 		</Panel>
 
-		<Panel Background="#00a19c" Grid.Column="1" Grid.Row="8"  Grid.ColumnSpan="6" >
+		<Panel Background="#00a19c" Grid.Column="1" Grid.Row="8"  Grid.ColumnSpan="3">
+			<StackPanel  Orientation="Horizontal">
+				<Button Content="Uninstall App." Command="{Binding RemoveAppCommand}" IsEnabled="True" IsVisible="{Binding !AppInSystemEmpty}" Margin="57 0 0 0" Padding="20 5" Foreground="White" BorderThickness="1" ToolTip.Tip="Click here to Uninstall Plugin.">
+				</Button>			
+			</StackPanel>
+		</Panel>
+		
+		<Panel Background="#00a19c" Grid.Column="4" Grid.Row="8"  Grid.ColumnSpan="3" >
 			<StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
 				<Button Content="Download" Click="OnDownloadAppClicked" IsEnabled="{Binding IsLaunchAble}" IsVisible="{Binding !CollectionEmpty}" Margin="4 0 20 0" Padding="20 5" Foreground="Black" BorderThickness="1" Background="White" BorderBrush="Black" ToolTip.Tip="Click here to download the Plugin.">
 				</Button>
@@ -81,16 +88,32 @@
 		</Panel>
 
 		<Panel Background="#00a19c" Grid.Column="1" Grid.Row="2"  Grid.ColumnSpan="6" Grid.RowSpan="6" IsVisible="{Binding CollectionEmpty}">
-			<StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-				<TextBlock Text="Let's get started by selecting an app..." Foreground="White" TextAlignment="Center" />
-				
-				<Button Content="Select App." Command="{Binding SelectAppCommand}" HorizontalAlignment="Center" Margin="0 8" Foreground="Black" BorderThickness="1" Background="White" BorderBrush="Black" ToolTip.Tip="Click here to select a Plugin.">
-				</Button>
+			<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+				<Panel Width="400" IsVisible="{Binding !AppInSystemEmpty}" Margin="10 0 100 0">
+					<TextBlock TextAlignment="Left" Foreground="White" Padding="0 10 0 0">All Apps available in the system...</TextBlock>
 
-				<TextBlock Text="** Click the button below to start installation if you have the downloaded Plugin" TextAlignment="Center" Foreground="GreenYellow" Margin="0 20 0 0" />
+					<ListBox Items="{Binding ItemsInSystem}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Margin="0 30 0 0" Foreground="White" Background="Teal">
+						<ListBox.ItemTemplate>
+							<DataTemplate>
+								<Border BorderBrush="Gray" BorderThickness="1" CornerRadius="3" Padding="4" Width="360" Margin="8 0">
+									<TextBlock Text="{Binding}"/>
+								</Border>
+							</DataTemplate>
+						</ListBox.ItemTemplate>
+					</ListBox>
 
-				<Button Content="Install App. From Downloaded File" IsEnabled="{Binding !IsBusy}" Click="OnInstallAppFromFileClicked" HorizontalAlignment="Center" Margin="0 8" Foreground="White" BorderThickness="1" ToolTip.Tip="Click here to start installation if downloaded Plugin is provided.">
-				</Button>
+				</Panel>
+				<StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+					<TextBlock Text="Let's get started by selecting an app..." Foreground="White" TextAlignment="Center" />
+
+					<Button Content="Select App." Command="{Binding SelectAppCommand}" HorizontalAlignment="Center" Margin="0 8" Foreground="Black" BorderThickness="1" Background="White" BorderBrush="Black" ToolTip.Tip="Click here to select a Plugin.">
+					</Button>
+
+					<TextBlock Text="** Click the button below to start installation if you have the downloaded Plugin" TextAlignment="Center" Foreground="GreenYellow" Margin="0 20 0 0" TextWrapping="Wrap" />
+
+					<Button Content="Install App. From Downloaded File" IsEnabled="{Binding !IsBusy}" Click="OnInstallAppFromFileClicked" HorizontalAlignment="Center" Margin="0 8" Foreground="White" BorderThickness="1" ToolTip.Tip="Click here to start installation if downloaded Plugin is provided.">
+					</Button>
+				</StackPanel>				
 			</StackPanel>
 		</Panel>
 

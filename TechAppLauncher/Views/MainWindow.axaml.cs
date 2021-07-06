@@ -24,6 +24,7 @@ namespace TechAppLauncher.Views
             this.WhenActivated(d => d(ViewModel.CloseWin.Subscribe(Close)));
             this.WhenActivated(d => d(ViewModel.ShowAppDialog.RegisterHandler(DoShowAppDialogAsync)));
             this.WhenActivated(d => d(ViewModel.ShowMsgDialog.RegisterHandler(DoShowMsgDialogAsync)));
+            this.WhenActivated(d => d(ViewModel.ShowRemoveAppDialog.RegisterHandler(DoShowRemoveAppDialogAsync)));
         }
 
         private void InitializeComponent()
@@ -85,6 +86,15 @@ namespace TechAppLauncher.Views
             msgDialog.DataContext = interaction.Input;
 
             var result = await msgDialog.ShowDialog<MessageDialogViewModel>(this);
+            interaction.SetOutput(result);
+        }
+
+        private async Task DoShowRemoveAppDialogAsync(InteractionContext<RemoveAppViewModel, RemoveAppViewModel> interaction)
+        {
+            var rmvAppDialog = new RemoveAppView();
+            rmvAppDialog.DataContext = interaction.Input;
+
+            var result = await rmvAppDialog.ShowDialog<RemoveAppViewModel>(this);
             interaction.SetOutput(result);
         }
     }
