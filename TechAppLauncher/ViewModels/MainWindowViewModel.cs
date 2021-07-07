@@ -590,7 +590,7 @@ namespace TechAppLauncher.ViewModels
             }
         }
 
-        private void LoadXmlContent()
+        public void LoadXmlContent()
         {
             IXmlDocService xmlDocService = new XmlDocService();
             var result = xmlDocService.XmlLoad(ItemsInSystem);

@@ -25,6 +25,12 @@ namespace TechAppLauncher.Views
             this.WhenActivated(d => d(ViewModel.ShowAppDialog.RegisterHandler(DoShowAppDialogAsync)));
             this.WhenActivated(d => d(ViewModel.ShowMsgDialog.RegisterHandler(DoShowMsgDialogAsync)));
             this.WhenActivated(d => d(ViewModel.ShowRemoveAppDialog.RegisterHandler(DoShowRemoveAppDialogAsync)));
+
+            this.Activated += (sender, e) =>
+            {
+                var context = this.DataContext as MainWindowViewModel;
+                context.LoadXmlContent();
+            };
         }
 
         private void InitializeComponent()
