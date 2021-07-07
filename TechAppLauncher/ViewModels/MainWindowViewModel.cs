@@ -525,6 +525,7 @@ namespace TechAppLauncher.ViewModels
                 await ShowMsgDialog.Handle(messageBoxDialog);
             }
 
+            Apps.Clear();
             this.IsBusy = false;
         }
 
@@ -577,6 +578,7 @@ namespace TechAppLauncher.ViewModels
                 await ShowMsgDialog.Handle(messageBoxDialog);
             }
 
+            Apps.Clear();
             this.IsBusy = false;
         }
 
