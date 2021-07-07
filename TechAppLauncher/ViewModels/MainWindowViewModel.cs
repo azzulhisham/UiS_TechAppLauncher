@@ -67,7 +67,6 @@ namespace TechAppLauncher.ViewModels
         private XmlNodeList _xnodes;
 
         private IList<RefFileDetail> refFileDetails;
-        private System.Timers.Timer timer_CheckVersion = new System.Timers.Timer();
 
 
         public string AppTitleBar
@@ -296,9 +295,6 @@ namespace TechAppLauncher.ViewModels
 
             CloseWin = ReactiveCommand.Create(() => 
             {
-                timer_CheckVersion.Enabled = false;
-                timer_CheckVersion.Dispose();
-
                 return this;
             });
 
@@ -320,29 +316,6 @@ namespace TechAppLauncher.ViewModels
 
             LoadXmlContent();
         }
-
-        private async void OnTimerEvent(object source, ElapsedEventArgs e)
-        {
-            timer_CheckVersion.Enabled = false;
-            ITechAppStoreNetworkRequestService techAppStoreService = new TechAppStoreService();
-
-            var assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version;
-            var versionControl = await techAppStoreService.GetLauncherVersion();
-
-            if (versionControl != null)
-            {
-                if (assemblyVersion.Major < versionControl.Major || assemblyVersion.MajorRevision < versionControl.MajorRevision ||
-                    assemblyVersion.Build < versionControl.Minor || assemblyVersion.Revision < versionControl.MinorRevision)
-                {
-                    string messageBoxText = "There is a newer version available.\r\nKindly update your app before start.";
-                    var messageBoxDialog = new MessageDialogViewModel(messageBoxText, Enums.MessageBoxStyle.IconStyle.Warning);
-                    await ShowMsgDialog.Handle(messageBoxDialog);
-                }
-            }
-
-            timer_CheckVersion.Enabled = true;
-        }
-
 
         private async Task LoadImage(CancellationToken cancellationToken)
         {
@@ -619,22 +592,10 @@ namespace TechAppLauncher.ViewModels
 
         private void LoadXmlContent()
         {
-            _xdoc.Load(@"C:\Users\zulhisham\Downloads\PluginManagerSettings.xml");
-            _xnodes = _xdoc.GetElementsByTagName("Plugin");
+            IXmlDocService xmlDocService = new XmlDocService();
+            var result = xmlDocService.XmlLoad(ItemsInSystem);
 
-            AppInSystemEmpty = true;
-            ItemsInSystem.Clear();
-
-            foreach (XmlNode item in _xnodes)
-            {
-                var name = item.SelectSingleNode("Name") == null ? " - " : item.SelectSingleNode("Name").InnerText;
-                var typeNames = item.SelectSingleNode("PluginTypeName") == null ? " - " : item.SelectSingleNode("PluginTypeName").InnerText;
-
-                string[] typeName = typeNames.Split(new char[] { ',' });
-
-                ItemsInSystem.Add($"{name}       :{typeName[1].Trim()}");
-                AppInSystemEmpty = false;
-            }
+            AppInSystemEmpty = result > 0 ? false : true;
         }
     }
 }

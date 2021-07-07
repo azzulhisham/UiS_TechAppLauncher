@@ -8,6 +8,7 @@ using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using TechAppLauncher.Services;
 
 namespace TechAppLauncher.ViewModels
 {
@@ -19,8 +20,7 @@ namespace TechAppLauncher.ViewModels
 
         public ObservableCollection<string> ItemsInSystem { get; } = new();
 
-        XmlDocument xdoc = new XmlDocument();
-        XmlNodeList xnodes;
+        IXmlDocService xmlDocService;
         string selectedItem = "";
 
         public string SelectedItem
@@ -31,6 +31,7 @@ namespace TechAppLauncher.ViewModels
 
         public RemoveAppViewModel()
         {
+            xmlDocService = new XmlDocService();
             ShowMsgDialog = new Interaction<MessageDialogViewModel, MessageDialogViewModel>();
 
             CloseWin = ReactiveCommand.Create(() =>
@@ -56,12 +57,9 @@ namespace TechAppLauncher.ViewModels
 
                     if (result != null && result.ButtonResult == Enums.MessageBoxStyle.ButtonResult.Yes)
                     {
-                        XmlNode item = xnodes[removeIndex];
-                        item.ParentNode.RemoveChild(item);
-
+                        xmlDocService.XmlRemoveItem(removeIndex);
                         ItemsInSystem.Remove(SelectedItem);
 
-                        xdoc.Save(@"C:\Users\zulhisham\Downloads\PluginManagerSettings1.xml");
                         LoadXmlContent();
                     }
                 }
@@ -71,21 +69,8 @@ namespace TechAppLauncher.ViewModels
         }
 
         private void LoadXmlContent() 
-        {
-            xdoc.Load(@"C:\Users\zulhisham\Downloads\PluginManagerSettings.xml");
-            xnodes = xdoc.GetElementsByTagName("Plugin");
-
-            ItemsInSystem.Clear();
-
-            foreach (XmlNode item in xnodes)
-            {
-                var name = item.SelectSingleNode("Name") == null ? " - " : item.SelectSingleNode("Name").InnerText;
-                var typeNames = item.SelectSingleNode("PluginTypeName") == null ? " - " : item.SelectSingleNode("PluginTypeName").InnerText;
-
-                string[] typeName = typeNames.Split(new char[] { ',' });
-
-                ItemsInSystem.Add($"{name}       :{typeName[1].Trim()}");
-            }
+        {         
+            var result = xmlDocService.XmlLoad(ItemsInSystem);
         }
     }
 }
