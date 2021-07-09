@@ -20,18 +20,22 @@ namespace TechAppLauncher.ViewModels
 
         public ObservableCollection<string> ItemsInSystem { get; } = new();
 
-        IXmlDocService xmlDocService;
-        string selectedItem = "";
+        private IXmlDocService _xmlDocService;
+        
+        private string _selectedItem = "";
+        private string _preSelectedItem = "";
 
         public string SelectedItem
         {
-            get => selectedItem;
-            set => this.RaiseAndSetIfChanged(ref selectedItem, value);
+            get => _selectedItem;
+            set => this.RaiseAndSetIfChanged(ref _selectedItem, value);
         }
 
-        public RemoveAppViewModel()
+        public RemoveAppViewModel(string preSelectedItem = null)
         {
-            xmlDocService = new XmlDocService();
+            this._preSelectedItem = preSelectedItem;
+
+            _xmlDocService = new XmlDocService();
             ShowMsgDialog = new Interaction<MessageDialogViewModel, MessageDialogViewModel>();
 
             CloseWin = ReactiveCommand.Create(() =>
@@ -57,7 +61,7 @@ namespace TechAppLauncher.ViewModels
 
                     if (result != null && result.ButtonResult == Enums.MessageBoxStyle.ButtonResult.Yes)
                     {
-                        xmlDocService.XmlRemoveItem(removeIndex);
+                        _xmlDocService.XmlRemoveItem(removeIndex);
                         ItemsInSystem.Remove(SelectedItem);
 
                         LoadXmlContent();
@@ -70,7 +74,13 @@ namespace TechAppLauncher.ViewModels
 
         private void LoadXmlContent() 
         {         
-            var result = xmlDocService.XmlLoad(ItemsInSystem);
+            var result = _xmlDocService.XmlLoad(ItemsInSystem);
+
+            if (!string.IsNullOrEmpty(this._preSelectedItem))
+            {
+                SelectedItem = this._preSelectedItem;
+                this._preSelectedItem = "";
+            }
         }
     }
 }

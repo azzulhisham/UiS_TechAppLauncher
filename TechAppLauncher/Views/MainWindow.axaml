@@ -92,7 +92,7 @@
 				<Panel Width="400" IsVisible="{Binding !AppInSystemEmpty}" Margin="10 0 100 0">
 					<TextBlock TextAlignment="Left" Foreground="White" Padding="0 10 0 0">All Apps available in the system...</TextBlock>
 
-					<ListBox Items="{Binding ItemsInSystem}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Margin="0 30 0 0" Foreground="White" Background="Teal">
+					<ListBox Items="{Binding ItemsInSystem}" SelectedItem="{Binding SelectedItem}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Margin="0 30 0 0" Foreground="White" Background="Teal">
 						<ListBox.ItemTemplate>
 							<DataTemplate>
 								<Border BorderBrush="Gray" BorderThickness="1" CornerRadius="3" Padding="4" Width="360" Margin="8 0">

@@ -62,12 +62,19 @@ namespace TechAppLauncher.ViewModels
 
         private string _installFromFile;
         private string _downloadAppPath;
+        private string _selectedItem = "";
 
         private XmlDocument _xdoc = new XmlDocument();
         private XmlNodeList _xnodes;
 
         private IList<RefFileDetail> refFileDetails;
 
+
+        public string SelectedItem
+        {
+            get => _selectedItem;
+            set => this.RaiseAndSetIfChanged(ref _selectedItem, value);
+        }
 
         public string AppTitleBar
         {
@@ -306,7 +313,7 @@ namespace TechAppLauncher.ViewModels
 
             RemoveAppCommand = ReactiveCommand.CreateFromTask(async () =>
             {
-                var removeApp = new RemoveAppViewModel();
+                var removeApp = new RemoveAppViewModel(SelectedItem);
                 var result = await ShowRemoveAppDialog.Handle(removeApp);
                 LoadXmlContent();
             });

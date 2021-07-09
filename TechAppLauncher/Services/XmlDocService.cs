@@ -40,10 +40,11 @@ namespace TechAppLauncher.Services
                 {
                     var name = item.SelectSingleNode("Name") == null ? " - " : item.SelectSingleNode("Name").InnerText;
                     var typeNames = item.SelectSingleNode("PluginTypeName") == null ? " - " : item.SelectSingleNode("PluginTypeName").InnerText;
+                    var appVersion = item.SelectSingleNode("AppVersion") == null ? " - " : item.SelectSingleNode("AppVersion").InnerText;
 
                     string[] typeName = typeNames.Split(new char[] { ',' });
 
-                    ItemsInSystem.Add($"{name}       :{typeName[1].Trim()}");
+                    ItemsInSystem.Add($"{name}     : {typeName[1].Trim()}   ({appVersion})");
                 }
 
                 return ItemsInSystem == null ? 0 : ItemsInSystem.Count;
