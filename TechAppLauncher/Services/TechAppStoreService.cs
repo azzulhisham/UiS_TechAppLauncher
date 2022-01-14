@@ -27,7 +27,7 @@ namespace TechAppLauncher.Services
         {
             _handler = new HttpClientHandler()
             {
-                Credentials = new NetworkCredential("techus.admin", "NS@ADout02122021", "petronas")
+                Credentials = new NetworkCredential("techus.admin", "gfEmW&C19pQ@dF", "petronas")
             };
 
             _handler.ClientCertificateOptions = ClientCertificateOption.Manual;
